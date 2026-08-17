@@ -29,6 +29,9 @@
 .ledgerRight{display:flex;align-items:center;gap:8px}.ledgerAmount{font-size:20px;font-weight:700;white-space:nowrap}.ledgerAmount.income{color:#2a9a61}.ledgerAmount.expense{color:#d65f5f}
 .ledgerDelete{width:34px;height:34px;border-radius:50%;padding:0;font-size:15px;background:#fff1f1;color:#a84b4b}
 .ledgerMonthSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.ledgerSum{background:#f5fbfd;border-radius:14px;padding:10px;text-align:center}.ledgerSum b{display:block;font-size:18px;margin-top:3px}
+.budgetRow{margin-top:12px}.budgetHead{display:flex;justify-content:space-between;gap:8px;font-size:13px}.budgetBar{height:10px;background:#e6eef1;border-radius:99px;overflow:hidden;margin-top:6px}.budgetFill{height:100%;background:#66c68a;border-radius:99px}.budgetOver{background:#e36b6b}
+.chartWrap{overflow-x:auto}.chart{width:100%;min-height:220px}.chartLegend{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.legendItem{display:flex;justify-content:space-between;gap:8px;font-size:12px;background:#f6fbfd;padding:8px;border-radius:10px}
+.dayClose{background:linear-gradient(135deg,#f0f9ff,#f5fff8);border:1px solid #d5eaf0}.closeSummary{background:#fff;border-radius:14px;padding:10px;margin-top:9px}.closeDone{background:#e7f7ed;color:#277d4b}.closeMiss{background:#ffeaea;color:#a54d4d}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -47,7 +50,12 @@
 </div><main>
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
 <section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 今日のデイリー</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
-<div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
+<div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card dayClose">
+<div class="row"><h2>🌙 1日の締め</h2><span class="muted" id="closeStatus">未確定</span></div>
+<div id="closePreview" class="closeSummary"></div>
+<button class="primary" style="width:100%;margin-top:10px" onclick="closeToday()">今日を締める</button>
+</div>
+<div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
 <section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">保存</button></div><div class="card">
 <h2>🔁 定期収支</h2>
 <div class="grid2">
@@ -59,6 +67,15 @@
 <div class="grid2"><div><div class="muted">毎月何日</div><input id="rtxDay" type="number" min="1" max="31" value="1"></div><div><div class="muted">開始月</div><input id="rtxStart" type="month"></div></div>
 <button class="primary" style="width:100%" onclick="addRecurringTx()">定期収支を追加</button>
 <div id="rtxList"></div>
+</div>
+<div class="card">
+<div class="row"><h2>🎯 月予算</h2><button onclick="tab('settings')">設定</button></div>
+<div id="budgetSummary"></div>
+</div>
+<div class="card">
+<div class="row"><h2>📊 家計簿グラフ</h2><span class="muted">今月の支出</span></div>
+<div class="chartWrap"><canvas id="expenseChart" class="chart" width="420" height="220"></canvas></div>
+<div id="chartLegend" class="chartLegend"></div>
 </div>
 <div class="card">
 <div class="row"><h2>📒 履歴</h2><span class="muted" id="historyMonthLabel"></span></div>
@@ -135,6 +152,19 @@
     <input id="settingsTitle" placeholder="シムレポート">
   </div>
   <div class="section">
+  <h2 style="font-size:17px">💰 月予算</h2>
+  <div class="muted">カテゴリごとの1か月の予算</div>
+  <div class="grid2">
+    <div><div class="muted">食費</div><input id="budgetFood" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">交通</div><input id="budgetTransport" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">固定費</div><input id="budgetFixed" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">車</div><input id="budgetCar" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">趣味</div><input id="budgetHobby" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">日用品</div><input id="budgetDaily" type="number" min="0" inputmode="numeric"></div>
+    <div><div class="muted">その他</div><input id="budgetOther" type="number" min="0" inputmode="numeric"></div>
+  </div>
+</div>
+<div class="section">
     <h2 style="font-size:17px">🎁 ご褒美ルール</h2>
     <div class="muted">週間</div>
     <div class="grid2">
@@ -168,6 +198,8 @@ if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
 if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
 if(!D.recurringTx)D.recurringTx=[];
 if(!D.dailyTemplates)D.dailyTemplates=[];
+if(!D.budgets)D.budgets={食費:0,交通:0,固定費:0,車:0,趣味:0,日用品:0,その他:0};
+if(!D.dayClosures)D.dayClosures={};
 if(typeof D.player!=='string')D.player='';
 if(D.title==='人生シム 大陸編')D.title='シムレポート';
 if(typeof D.setupDone!=='boolean')D.setupDone=false;
@@ -290,7 +322,7 @@ function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.s
 function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
 function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventMemo').value='';save();render()}function delEvent(id){D.events=D.events.filter(x=>x.id!==id);save();render()}
-function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline();renderSearch()}function pick(k){selected=k;render()}
+function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}function pick(k){selected=k;render()}
 async function addPhoto(){let f=$('photoInput').files[0];if(!f)return alert('写真を選んでください');let data=await resize(f);D.events.push({id:Date.now(),kind:'photo',date:selected,title:$('photoCaption').value||'写真',data,createdAt:Date.now()});try{save()}catch(e){D.events.pop();return alert('保存容量がいっぱいです')} $('photoInput').value='';$('photoCaption').value='';render()}
 function resize(f){return new Promise(r=>{let fr=new FileReader();fr.onload=()=>{let im=new Image();im.onload=()=>{let s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.65))};im.src=fr.result};fr.readAsDataURL(f)})}
 function renameApp(){let v=$('titleInput').value.trim();if(v){D.title=v;save();render()}}
@@ -442,7 +474,62 @@ function saveRewardContents(){
  D.rewards.monthReward=$('monthReward').value.trim();
  save();render();
 }
+
+function categoryBudgetId(cat){
+ return {食費:'budgetFood',交通:'budgetTransport',固定費:'budgetFixed',車:'budgetCar',趣味:'budgetHobby',日用品:'budgetDaily',その他:'budgetOther'}[cat];
+}
+function saveBudgetsFromSettings(){
+ ['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{
+   let id=categoryBudgetId(cat);D.budgets[cat]=Math.max(0,Number($(id).value)||0);
+ });
+}
+function renderBudgetSummary(){
+ let n=new Date(),prefix=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+ let cats=['食費','交通','固定費','車','趣味','日用品','その他'];
+ $('budgetSummary').innerHTML=cats.map(cat=>{
+   let spent=D.tx.filter(x=>x.type==='expense'&&x.date.startsWith(prefix)&&x.cat===cat).reduce((a,b)=>a+b.amount,0);
+   let budget=Number(D.budgets[cat]||0);
+   if(!budget)return '';
+   let pct=Math.min(100,Math.round(spent/budget*100));
+   let left=budget-spent;
+   return `<div class="budgetRow"><div class="budgetHead"><b>${cat}</b><span>¥${spent.toLocaleString()} / ¥${budget.toLocaleString()}</span></div><div class="budgetBar"><div class="budgetFill ${spent>budget?'budgetOver':''}" style="width:${pct}%"></div></div><div class="muted">${left>=0?'残り ¥'+left.toLocaleString():'予算超過 ¥'+Math.abs(left).toLocaleString()}</div></div>`;
+ }).join('')||'<div class="muted">設定画面から月予算を設定できます。</div>';
+}
+function renderExpenseChart(){
+ let c=$('expenseChart');if(!c)return;let ctx=c.getContext('2d');
+ let n=new Date(),prefix=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+ let cats=['食費','交通','固定費','車','趣味','日用品','その他'];
+ let vals=cats.map(cat=>D.tx.filter(x=>x.type==='expense'&&x.date.startsWith(prefix)&&x.cat===cat).reduce((a,b)=>a+b.amount,0));
+ let max=Math.max(1,...vals),w=c.width,h=c.height,pad=28,barW=(w-pad*2)/cats.length*0.62,gap=(w-pad*2)/cats.length;
+ ctx.clearRect(0,0,w,h);ctx.font='11px -apple-system';ctx.textAlign='center';ctx.fillStyle='#607985';
+ cats.forEach((cat,i)=>{
+   let x=pad+i*gap+gap/2,barH=(h-55)*vals[i]/max,y=h-30-barH;
+   ctx.fillStyle='#7fb9d9';ctx.fillRect(x-barW/2,y,barW,barH);
+   ctx.fillStyle='#607985';ctx.fillText(cat,x,h-12);
+   if(vals[i]>0)ctx.fillText('¥'+Math.round(vals[i]/1000)+'k',x,Math.max(12,y-5));
+ });
+ $('chartLegend').innerHTML=cats.map((cat,i)=>`<div class="legendItem"><span>${cat}</span><b>¥${vals[i].toLocaleString()}</b></div>`).join('');
+}
+function todaySummary(){
+ let k=dk(new Date());
+ let q=D.quests.filter(x=>questPlanDate(x)===k);
+ let achieved=q.filter(x=>x.status==='achieved').length,missed=q.filter(x=>x.status==='missed').length,pending=q.filter(x=>!x.status||x.status==='pending').length;
+ let tx=D.tx.filter(x=>x.date===k),expense=tx.filter(x=>x.type==='expense').reduce((a,b)=>a+b.amount,0),income=tx.filter(x=>x.type==='income').reduce((a,b)=>a+b.amount,0);
+ return {k,achieved,missed,pending,expense,income,mood:moodValue(k),events:D.events.filter(x=>x.date===k).length,memos:D.memos.filter(x=>{let ts=x.createdAt||x.id||0;return ts&&dk(new Date(ts))===k}).length};
+}
+function renderDayClose(){
+ let s=todaySummary(),closed=D.dayClosures[s.k];
+ $('closeStatus').textContent=closed?'確定済み':'未確定';
+ $('closePreview').innerHTML=`<div><b>🎯 デイリー</b>　✅${s.achieved} / ❌${s.missed} / ⏳${s.pending}</div><div style="margin-top:5px"><b>💰 今日の収支</b>　${s.income-s.expense>=0?'+':''}¥${(s.income-s.expense).toLocaleString()}</div><div style="margin-top:5px"><b>☀️ 調子</b>　${s.mood||'未入力'}　　<b>📅記録</b> ${s.events}件</div>${closed?`<div class="muted" style="margin-top:6px">締め時刻：${new Date(closed.closedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}</div>`:''}`;
+}
+function closeToday(){
+ let s=todaySummary();
+ D.dayClosures[s.k]={closedAt:Date.now(),summary:s};
+ save();render();
+}
+
 function saveAppSettings(){
+ saveBudgetsFromSettings();
  D.player=$('settingsPlayer').value.trim();
  let t=$('settingsTitle').value.trim();
  if(t)D.title=t;
@@ -460,7 +547,9 @@ function restoreDataFromSettings(){
 if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
 if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
 if(!D.recurringTx)D.recurringTx=[];
-if(!D.dailyTemplates)D.dailyTemplates=[];save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
+if(!D.dailyTemplates)D.dailyTemplates=[];
+if(!D.budgets)D.budgets={食費:0,交通:0,固定費:0,車:0,趣味:0,日用品:0,その他:0};
+if(!D.dayClosures)D.dayClosures={};save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
  r.readAsText(f);
 }
 function resetAllData(){
@@ -525,6 +614,6 @@ function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInpu
    section('today','今日',todayQs,false)+
    section('future','今後（単発）',futureQs,true)+
    section('past','過去',pastQs,true);
-}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch()}
+}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0})$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
