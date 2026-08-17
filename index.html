@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8fd3ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="人生シム">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>人生シム 大陸編</title>
+<style>
+:root{
+  --bg:#eaf8ff; --card:#ffffffd9; --ink:#244052; --muted:#6d8492;
+  --green:#61c987; --blue:#65b9ed; --pink:#f29ab6; --yellow:#f5c95d;
+  --purple:#ad9be8; --orange:#f3a65c; --shadow:0 8px 24px #5b8ca522;
+}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:var(--ink);
+background:linear-gradient(#8ed6ff 0 28%,#dff7ff 48%,#c9edb7 100%);min-height:100vh}
+.app{max-width:520px;margin:auto;padding:18px 14px 90px}
+.hero{height:150px;border-radius:28px;background:linear-gradient(135deg,#76caff,#9fe8d0);position:relative;overflow:hidden;box-shadow:var(--shadow);padding:22px}
+.hero:after{content:"";position:absolute;width:210px;height:110px;right:-35px;bottom:-45px;border-radius:50%;background:#fff7;box-shadow:-80px 15px 0 8px #fff5}
+h1{font-size:25px;margin:0 0 4px}.sub{font-size:13px;color:#396173}.plumbob{position:absolute;right:30px;top:22px;font-size:50px;filter:drop-shadow(0 5px 5px #38865a55)}
+.card{background:var(--card);backdrop-filter:blur(8px);border:1px solid #fff;border-radius:22px;padding:16px;margin-top:13px;box-shadow:var(--shadow)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.title{font-weight:800;font-size:17px}.money{font-size:27px;font-weight:900}
+.tabs{position:fixed;z-index:10;bottom:0;left:0;right:0;background:#ffffffec;backdrop-filter:blur(15px);display:flex;justify-content:center;box-shadow:0 -5px 20px #49758c22}
+.tab{border:0;background:none;padding:11px 13px 9px;font-size:11px;color:#71818a}.tab b{display:block;font-size:21px}.tab.active{color:#35a86a;font-weight:800}
+.screen{display:none}.screen.active{display:block}
+.bar{height:9px;background:#e4edf0;border-radius:99px;overflow:hidden;margin-top:7px}.fill{height:100%;border-radius:99px}
+.stat{margin:11px 0}.statline{display:flex;justify-content:space-between;font-size:13px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+button.action,button.primary{border:0;border-radius:15px;padding:12px;background:#eff9ff;color:#28566b;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button.primary{background:#69cb89;color:white;width:100%}
+.quest{padding:11px 0;border-bottom:1px solid #dcebed;display:flex;gap:9px;align-items:flex-start}
+.quest:last-child{border:0}.quest input{width:20px;height:20px;accent-color:#62c887}
+.small{font-size:12px;color:var(--muted)} .tag{font-size:11px;padding:4px 8px;border-radius:99px;background:#e6f6eb;color:#348653}
+input[type=number],input[type=text]{width:100%;padding:11px;border:1px solid #d7e7eb;border-radius:12px;font-size:16px;background:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.skill{padding:12px;border-radius:16px;background:#f7fbfc}
+.notice{font-size:12px;background:#fff8d9;padding:10px 12px;border-radius:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="plumbob">◆</div>
+    <h1>人生シム 大陸編</h1>
+    <div class="sub">人生をゲームとしてプレイする。 <span id="clock">--:--</span></div>
+    <div style="margin-top:24px"><span class="tag">Lv. 1</span> <span class="small">今日の目標を1つクリア</span></div>
+  </div>
+
+  <section id="home" class="screen active">
+    <div class="card">
+      <div class="row"><div class="title">💰 所持金</div><span class="small">セーブ自動保存</span></div>
+      <div class="money" id="moneyView">¥0</div>
+      <div class="actions">
+        <button class="action" onclick="addMoney(1000)">＋ ¥1,000</button>
+        <button class="action" onclick="addMoney(-1000)">− ¥1,000</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="title">🎯 メインクエスト</div><span class="tag">進行中</span></div>
+      <div style="font-size:20px;font-weight:800;margin-top:8px">次の生活を作る</div>
+      <div class="small">仕事・お金・家を少しずつ整える</div>
+    </div>
+    <div class="card">
+      <div class="title">⚡ 今日の状態</div>
+      <div id="homeStats"></div>
+    </div>
+    <div class="card">
+      <div class="title">✨ 今日のクエスト</div>
+      <div id="homeQuests"></div>
+    </div>
+  </section>
+
+  <section id="status" class="screen">
+    <div class="card"><div class="title">🧑 キャラクター</div><div id="stats"></div>
+      <div class="notice">数値は自由に変更できます。バーを動かすか、右側の数字をタップして入力してください。<br>※このHTMLはSafariで開くとボタン・保存・時計が動作します。</div>
+    </div>
+    <div class="card">
+      <div class="title">⚡ 行動</div>
+      <div class="actions">
+        <button class="action" onclick="act('sleep')">😴 睡眠</button>
+        <button class="action" onclick="act('meal')">🍚 食事</button>
+        <button class="action" onclick="act('clean')">🧹 片付け</button>
+        <button class="action" onclick="act('fun')">🎮 趣味</button>
+        <button class="action" onclick="act('bath')">🚿 風呂</button>
+        <button class="action" onclick="act('work')">💼 仕事</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="money" class="screen">
+    <div class="card">
+      <div class="title">💰 お金</div>
+      <label class="small">現在の所持金（自由入力）</label>
+      <input id="moneyInput" type="number" inputmode="numeric" onchange="setMoney(this.value)">
+      <button class="primary" style="margin-top:10px" onclick="resetExample()">初期サンプルに戻す</button>
+      <div class="grid" style="margin-top:10px">
+        <div><label class="small">今月の収入</label><input id="income" type="number" inputmode="numeric" onchange="setFinance('income',this.value)"></div>
+        <div><label class="small">今月の支出</label><input id="expense" type="number" inputmode="numeric" onchange="setFinance('expense',this.value)"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">🛒 支出を記録</div>
+      <div class="grid">
+        <button class="action" onclick="spend(500)">🍙 食費 ¥500</button>
+        <button class="action" onclick="spend(1000)">🍜 食費 ¥1,000</button>
+        <button class="action" onclick="spend(1000)">🚗 その他 ¥1,000</button>
+        <button class="action" onclick="spend(3000)">🛍 その他 ¥3,000</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="quests" class="screen">
+    <div class="card">
+      <div class="title">🎯 クエスト</div>
+      <div class="quest"><input type="checkbox" onchange="questDone(this,20)"><div><b>部屋を30分片付ける</b><div class="small">住環境 +8 / XP +20</div></div></div>
+      <div class="quest"><input type="checkbox" onchange="questDone(this,15)"><div><b>面接・転職準備をする</b><div class="small">キャリア +5 / XP +15</div></div></div>
+      <div class="quest"><input type="checkbox" onchange="questDone(this,10)"><div><b>今日の食事を整える</b><div class="small">体力 +4 / XP +10</div></div></div>
+      <div class="quest"><input type="checkbox" onchange="questDone(this,10)"><div><b>23:30までに寝る</b><div class="small">睡眠 +10 / XP +10</div></div></div>
+    </div>
+  </section>
+
+  <section id="skills" class="screen">
+    <div class="card"><div class="title">📈 スキル</div><div class="grid" style="margin-top:12px">
+      <div class="skill">🍳 料理<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:25%;background:var(--orange)"></div></div></div>
+      <div class="skill">🚗 運転<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:35%;background:var(--blue)"></div></div></div>
+      <div class="skill">🧹 片付け<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:15%;background:var(--green)"></div></div></div>
+      <div class="skill">💬 コミュ力<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:30%;background:var(--pink)"></div></div></div>
+      <div class="skill">💴 お金管理<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:20%;background:var(--yellow)"></div></div></div>
+      <div class="skill">🎮 趣味<br><b>Lv. 1</b><div class="bar"><div class="fill" style="width:40%;background:var(--purple)"></div></div></div>
+    </div></div>
+    <div class="card"><div class="title">🏆 長期目標</div>
+      <div class="quest">💰 <div><b>貯金を増やす</b><div class="small">お金の安心を作る</div></div></div>
+      <div class="quest">🏠 <div><b>快適な部屋にする</b><div class="small">住環境を上げる</div></div></div>
+      <div class="quest">💼 <div><b>新しい仕事で安定する</b><div class="small">キャリアを育てる</div></div></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs">
+  <button class="tab active" onclick="show('home',this)"><b>🏠</b>ホーム</button>
+  <button class="tab" onclick="show('status',this)"><b>❤️</b>状態</button>
+  <button class="tab" onclick="show('money',this)"><b>💰</b>お金</button>
+  <button class="tab" onclick="show('quests',this)"><b>🎯</b>クエスト</button>
+  <button class="tab" onclick="show('skills',this)"><b>📈</b>スキル</button>
+</nav>
+
+<script>
+const defaults={money:0,income:0,expense:0,stats:{体力:70,メンタル:60,空腹:70,睡眠:60,衛生:70,楽しさ:50,社交:50,住環境:40}};
+let d=JSON.parse(localStorage.lifeSim||'null')||defaults;
+const colors=['#61c987','#f29ab6','#f3a65c','#65b9ed','#5fcac2','#ad9be8','#f5c95d','#c89167'];
+function save(){localStorage.lifeSim=JSON.stringify(d);render()}
+function clamp(n){return Math.max(0,Math.min(100,n))}
+function addMoney(n){d.money+=n;save();toast((n>0?'＋':'−')+'¥'+Math.abs(n).toLocaleString())}
+function spend(n){d.money-=n;d.expense+=n;save();toast('支出 ¥'+n.toLocaleString())}
+function setMoney(v){d.money=Number(v)||0;save();toast('所持金を更新')}
+function setFinance(k,v){d[k]=Number(v)||0;save()}
+function resetExample(){
+ d={money:880000,income:197049,expense:59920,stats:{体力:70,メンタル:60,空腹:70,睡眠:60,衛生:70,楽しさ:50,社交:50,住環境:40}};
+ save();
+}
+
+function act(type){
+ let s=d.stats;
+ const changes={
+  sleep:{睡眠:25,体力:15,メンタル:5,空腹:-10},
+  meal:{空腹:30,体力:5,お金:-800},
+  clean:{住環境:10,衛生:4,メンタル:4,楽しさ:-2},
+  fun:{楽しさ:20,メンタル:8,睡眠:-4},
+  bath:{衛生:25,メンタル:3,体力:-2},
+  work:{体力:-15,メンタル:-8,空腹:-8,お金:5000,住環境:0}
+ }[type];
+ for(const [k,v] of Object.entries(changes)){if(k==='お金')d.money+=v;else s[k]=clamp((s[k]||0)+v)}
+ save();
+}
+function questDone(el,xp){if(el.checked){el.parentElement.style.opacity=.45;alert('クエスト達成！ XP +'+xp)}} 
+function statHTML(){
+ return Object.entries(d.stats).map(([k,v],i)=>`<div class="stat">
+   <div class="statline">
+     <span>${['❤️','🧠','🍚','😴','🚿','🎮','👥','🏠'][i]} ${k}</span>
+     <input aria-label="${k}" type="number" min="0" max="100" value="${v}"
+       style="width:62px;padding:5px 7px;border:1px solid #d7e7eb;border-radius:9px;text-align:right;font-weight:800"
+       onchange="setStat('${k}',this.value)">
+   </div>
+   <input type="range" min="0" max="100" value="${v}" oninput="previewStat('${k}',this.value)" onchange="setStat('${k}',this.value)"
+     style="width:100%;accent-color:${colors[i]};margin-top:7px">
+ </div>`).join('')
+}
+function setStat(k,v){d.stats[k]=clamp(Number(v)||0);save();toast(k+' を '+d.stats[k]+' に変更')}
+function previewStat(k,v){
+  const n=clamp(Number(v)||0);
+  const card=document.querySelector(`[aria-label="${k}"]`);
+  if(card) card.value=n;
+  d.stats[k]=n;
+  document.getElementById('homeStats').innerHTML=Object.entries(d.stats).slice(0,5).map(([kk,vv],i)=>`<div class="stat"><div class="statline"><span>${['❤️','🧠','🍚','😴','🚿'][i]} ${kk}</span><b>${vv}</b></div><div class="bar"><div class="fill" style="width:${vv}%;background:${colors[i]}"></div></div></div>`).join('');
+  localStorage.lifeSim=JSON.stringify(d);
+}
+function render(){
+ document.getElementById('moneyView').textContent='¥'+d.money.toLocaleString();
+ document.getElementById('stats').innerHTML=statHTML();
+ document.getElementById('homeStats').innerHTML=Object.entries(d.stats).slice(0,5).map(([k,v],i)=>`<div class="stat"><div class="statline"><span>${['❤️','🧠','🍚','😴','🚿'][i]} ${k}</span><b>${v}</b></div><div class="bar"><div class="fill" style="width:${v}%;background:${colors[i]}"></div></div></div>`).join('');
+ document.getElementById('homeQuests').innerHTML='<div class="quest">⭐ <div><b>今日のクエストを1つクリアする</b><div class="small">まずは小さく進める</div></div></div><div class="quest">🧹 <div><b>部屋を少しだけ片付ける</b><div class="small">5分でも達成</div></div></div>';
+ document.getElementById('moneyInput').value=d.money;
+ document.getElementById('income').value=d.income; document.getElementById('expense').value=d.expense;
+}
+
+function updateClock(){
+  const el=document.getElementById('clock');
+  if(el){
+    const now=new Date();
+    el.textContent=now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+setInterval(updateClock,1000);
+updateClock();
+
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;left:50%;bottom:82px;transform:translateX(-50%);background:#244052;color:white;padding:10px 16px;border-radius:999px;font-size:13px;z-index:99;opacity:0;transition:.2s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.opacity='0',1000);
+}
+
+function show(id,btn){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+render();
+</script>
+<script>if ('serviceWorker' in navigator) { window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{})); }</script>
+</body></html>
