@@ -94,7 +94,7 @@
 <input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date">
 <select id="qRepeat"><option value="none">この日だけ</option><option value="daily">毎日</option><option value="weekday">平日（月〜金）</option><option value="weekly">毎週この曜日</option></select>
 <textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
-<div class="card"><h2>🔁 繰り返しデイリー</h2><div class="muted">登録した繰り返しは自動で今日以降のデイリーを作ります。</div><div id="dailyTemplateList"></div></div>
+<div class="card"><h2>🔁 繰り返しデイリー</h2><div class="muted">繰り返しデイリーは、その日になった時だけ今日のデイリーとして自動追加されます。</div><div id="dailyTemplateList"></div></div>
 <div class="card">
 <h2>🎁 ご褒美内容</h2>
 <div class="muted">週間ご褒美</div>
@@ -224,13 +224,15 @@ function templateMatchesDate(t,dateStr){
  return false;
 }
 function ensureDailyQuests(){
- let today=new Date(),end=new Date();end.setDate(end.getDate()+14);
+ let k=dk(new Date());
  (D.dailyTemplates||[]).filter(t=>t.active!==false).forEach(t=>{
-   for(let d=new Date(t.start+'T12:00:00');d<=end;d.setDate(d.getDate()+1)){
-     let k=dk(d);if(!templateMatchesDate(t,k))continue;
-     if(D.quests.some(q=>q.templateId===t.id&&questPlanDate(q)===k))continue;
-     D.quests.push({id:Date.now()+Math.floor(Math.random()*100000),title:t.title,due:k,memo:t.memo,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null,templateId:t.id});
-   }
+   if(!templateMatchesDate(t,k))return;
+   if(D.quests.some(q=>q.templateId===t.id&&questPlanDate(q)===k))return;
+   D.quests.push({
+     id:Date.now()+Math.floor(Math.random()*100000),
+     title:t.title,due:k,memo:t.memo,status:'pending',done:false,
+     createdAt:Date.now(),resultAt:null,completedAt:null,templateId:t.id
+   });
  });
  save();
 }
@@ -456,7 +458,7 @@ function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInpu
    </div>`;
  };
  let todayQs=D.quests.filter(x=>questPlanDate(x)===today);
- let futureQs=D.quests.filter(x=>questPlanDate(x)>today);
+ let futureQs=D.quests.filter(x=>questPlanDate(x)>today&&!x.templateId);
  let pastQs=D.quests.filter(x=>questPlanDate(x)<today);
 
  let section=(key,label,items,collapsed=false)=>`
@@ -472,7 +474,7 @@ function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInpu
 
  $('qList').innerHTML=
    section('today','今日',todayQs,false)+
-   section('future','今後',futureQs,true)+
+   section('future','今後（単発）',futureQs,true)+
    section('past','過去',pastQs,true);
 }$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
