@@ -22,6 +22,13 @@
 .dailyItem{padding:10px 0;border-bottom:1px solid #deebef}.dailyTop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.dailyTitle{font-size:17px;font-weight:900;line-height:1.25}.dailyMeta{font-size:12px;color:#8198a5;margin-top:2px}
 .dailyActions{display:none;gap:6px;flex-wrap:wrap;margin-top:8px}.dailyActions.open{display:flex}.dailyActions button{padding:8px 10px;font-size:13px}.judgeBtn{padding:7px 10px;font-size:12px;background:#edf8fc;white-space:nowrap}
 .statusMini{display:inline-block;padding:3px 7px;border-radius:99px;font-size:10px;font-weight:900;margin-top:4px}.statusMini.achieved{background:#dff7e8;color:#277d4b}.statusMini.missed{background:#ffe9e9;color:#a54a4a}.statusMini.pending{background:#edf3f6;color:#718590}
+.ledgerDay{margin-top:14px;border-top:1px solid #d8e6eb}.ledgerDay:first-child{border-top:0;margin-top:4px}
+.ledgerDate{padding:8px 2px 5px;font-size:13px;color:#596f7d;font-weight:800}
+.ledgerRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;border-top:1px solid #e2ecef}
+.ledgerRow:first-of-type{border-top:0}.ledgerLeft{min-width:0}.ledgerCat{font-size:17px;font-weight:800}.ledgerMemo{font-size:12px;color:#8299a6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.ledgerRight{display:flex;align-items:center;gap:8px}.ledgerAmount{font-size:20px;font-weight:700;white-space:nowrap}.ledgerAmount.income{color:#2a9a61}.ledgerAmount.expense{color:#d65f5f}
+.ledgerDelete{width:34px;height:34px;border-radius:50%;padding:0;font-size:15px;background:#fff1f1;color:#a84b4b}
+.ledgerMonthSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.ledgerSum{background:#f5fbfd;border-radius:14px;padding:10px;text-align:center}.ledgerSum b{display:block;font-size:18px;margin-top:3px}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -53,7 +60,15 @@
 <button class="primary" style="width:100%" onclick="addRecurringTx()">定期収支を追加</button>
 <div id="rtxList"></div>
 </div>
-<div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
+<div class="card">
+<div class="row"><h2>📒 履歴</h2><span class="muted" id="historyMonthLabel"></span></div>
+<div class="ledgerMonthSummary">
+  <div class="ledgerSum"><span class="muted">収入</span><b id="historyIncome">¥0</b></div>
+  <div class="ledgerSum"><span class="muted">支出</span><b id="historyExpense">¥0</b></div>
+  <div class="ledgerSum"><span class="muted">合計</span><b id="historyNet">¥0</b></div>
+</div>
+<div id="txList"></div>
+</div></section>
 <section id="calendar" class="screen"><div class="card"><div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div><div class="calendar" id="cal"></div></div><div class="card"><h2>📅 <span id="selDate"></span></h2><input id="eventTitle" placeholder="予定"><input id="eventTime" type="time"><textarea id="eventMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button><input id="photoInput" type="file" accept="image/*"><input id="photoCaption" placeholder="写真のひとこと"><button style="width:100%" onclick="addPhoto()">📷 写真を追加</button><div id="dayLog"></div></div></section>
 
 <section id="timeline" class="screen">
@@ -189,6 +204,40 @@ function ensureRecurringTx(){
    D.money+=r.type==='income'?r.amount:-r.amount;
  });
  save();
+}
+
+
+function jpDateLabel(dateStr){
+ let d=new Date(dateStr+'T12:00:00');
+ let w='日月火水木金土'[d.getDay()];
+ return `${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日(${w})`;
+}
+function renderLedgerHistory(){
+ let now=new Date(),prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+ let rows=D.tx.slice().sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||b.id||0)-(a.createdAt||a.id||0));
+ let grouped={};
+ rows.forEach(x=>(grouped[x.date]??=[]).push(x));
+ $('txList').innerHTML=Object.keys(grouped).length?Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date=>`
+   <div class="ledgerDay">
+     <div class="ledgerDate">${jpDateLabel(date)}</div>
+     ${grouped[date].map(x=>`<div class="ledgerRow">
+       <div class="ledgerLeft">
+         <div class="ledgerCat">${x.cat}</div>
+         ${x.memo?`<div class="ledgerMemo">${x.memo}</div>`:''}
+       </div>
+       <div class="ledgerRight">
+         <div class="ledgerAmount ${x.type==='income'?'income':'expense'}">${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</div>
+         <button class="ledgerDelete" aria-label="削除" onclick="delTx(${x.id})">🗑</button>
+       </div>
+     </div>`).join('')}
+   </div>`).join(''):'<div class="muted" style="padding:14px 0">履歴なし</div>';
+
+ let monthRows=D.tx.filter(x=>x.date.startsWith(prefix)),inc=0,exp=0;
+ monthRows.forEach(x=>x.type==='income'?inc+=x.amount:exp+=x.amount);
+ $('historyMonthLabel').textContent=`${now.getFullYear()}年${now.getMonth()+1}月`;
+ $('historyIncome').textContent='¥'+inc.toLocaleString();
+ $('historyExpense').textContent='¥'+exp.toLocaleString();
+ let net=inc-exp;$('historyNet').textContent=(net>=0?'+':'')+'¥'+net.toLocaleString();
 }
 
 function delTx(id){
@@ -434,7 +483,7 @@ function toggleDailySection(name){
 }
 
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
+function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
  let itemHtml=x=>{
    let st=x.status||'pending';
