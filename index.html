@@ -32,6 +32,8 @@
 .budgetRow{margin-top:12px}.budgetHead{display:flex;justify-content:space-between;gap:8px;font-size:13px}.budgetBar{height:10px;background:#e6eef1;border-radius:99px;overflow:hidden;margin-top:6px}.budgetFill{height:100%;background:#66c68a;border-radius:99px}.budgetOver{background:#e36b6b}
 .chartWrap{overflow-x:auto}.chart{width:100%;min-height:220px}.chartLegend{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.legendItem{display:flex;justify-content:space-between;gap:8px;font-size:12px;background:#f6fbfd;padding:8px;border-radius:10px}
 .dayClose{background:linear-gradient(135deg,#f0f9ff,#f5fff8);border:1px solid #d5eaf0}.closeSummary{background:#fff;border-radius:14px;padding:10px;margin-top:9px}.closeDone{background:#e7f7ed;color:#277d4b}.closeMiss{background:#ffeaea;color:#a54d4d}
+.nav .tab{min-width:0}.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 14px}.seg button{padding:9px 6px;font-size:12px}.seg button.active{background:#dff3fb;color:#2d647c;font-weight:900}
+#calendarLogPanel,#calendarMonthPanel{padding-top:4px}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -49,7 +51,13 @@
  </div>
 </div><main>
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
-<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 今日のデイリー</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
+<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card">
+<div class="row"><h2>🎯 デイリークエスト</h2><button id="homeDailyToggle" onclick="toggleHomeDaily()">開く</button></div>
+<div id="homeDailyBody" style="display:none;margin-top:8px">
+  <div id="nextQuest"></div>
+  <button style="width:100%;margin-top:10px" onclick="tab('quests')">デイリー画面を開く</button>
+</div>
+</div>
 <div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card dayClose">
 <div class="row"><h2>🌙 1日の締め</h2><span class="muted" id="closeStatus">未確定</span></div>
 <div id="closePreview" class="closeSummary"></div>
@@ -86,41 +94,71 @@
 </div>
 <div id="txList"></div>
 </div></section>
-<section id="calendar" class="screen"><div class="card"><div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div><div class="calendar" id="cal"></div></div><div class="card"><h2>📅 <span id="selDate"></span></h2><input id="eventTitle" placeholder="予定"><input id="eventTime" type="time"><textarea id="eventMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button><input id="photoInput" type="file" accept="image/*"><input id="photoCaption" placeholder="写真のひとこと"><button style="width:100%" onclick="addPhoto()">📷 写真を追加</button><div id="dayLog"></div></div></section>
+<section id="calendar" class="screen">
+  <div class="card">
+    <div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div>
+    <div class="calendar" id="cal"></div>
+  </div>
 
-<section id="timeline" class="screen">
-<div class="card">
-  <div class="row"><h2>🕒 タイムライン</h2><span class="muted">人生ログ</span></div>
-<div class="filterRow" id="timelineFilters">
-<button class="filterBtn active" onclick="setTimelineFilter('all',this)">全部</button>
-<button class="filterBtn" onclick="setTimelineFilter('tx',this)">💰家計簿</button>
-<button class="filterBtn" onclick="setTimelineFilter('quest',this)">🎯デイリー</button>
-<button class="filterBtn" onclick="setTimelineFilter('event',this)">📅予定</button>
-<button class="filterBtn" onclick="setTimelineFilter('photo',this)">📷写真</button>
-<button class="filterBtn" onclick="setTimelineFilter('memo',this)">📝メモ</button>
-</div>
-<div class="card" style="margin:8px 0 12px;padding:12px">
-<div class="row"><b>🔎 検索</b><button onclick="clearSearch()">クリア</button></div>
-<input id="searchInput" placeholder="家計簿・予定・デイリー・メモを検索" oninput="renderSearch()">
-<div id="searchResults"></div>
-</div>
-  <div class="seg"><button id="dayModeBtn" class="active" onclick="setTimelineMode('day')">1日ログ</button><button id="monthModeBtn" onclick="setTimelineMode('month')">月間まとめ</button></div>
-  <div id="timelineDay">
-    <div class="row"><button onclick="moveTimelineDay(-1)">← 前日</button><b id="timelineDayTitle"></b><button onclick="moveTimelineDay(1)">翌日 →</button></div>
-    <div id="dayTimeline"></div>
-  </div>
-  <div id="timelineMonth" style="display:none">
-    <div class="monthnav"><button onclick="moveTimelineMonth(-1)">←</button><b id="timelineMonthTitle"></b><button onclick="moveTimelineMonth(1)">→</button></div>
-    <div class="grid2">
-      <div class="summarybox"><div class="muted">収支</div><div class="summarynum" id="tmNet"></div></div>
-      <div class="summarybox"><div class="muted">支出</div><div class="summarynum" id="tmExpense"></div></div>
-      <div class="summarybox"><div class="muted">デイリー結果</div><div class="summarynum" id="tmQuest"></div></div>
-      <div class="summarybox"><div class="muted">写真 / メモ</div><div class="summarynum" id="tmLogs"></div></div>
+  <div class="card">
+    <div class="row"><h2>📅 <span id="selDate"></span></h2><span class="muted">予定・記録</span></div>
+    <div class="seg">
+      <button id="calPlanBtn" class="active" onclick="setCalendarPanel('plan')">予定を追加</button>
+      <button id="calLogBtn" onclick="setCalendarPanel('log')">この日のログ</button>
+      <button id="calMonthBtn" onclick="setCalendarPanel('month')">月まとめ</button>
     </div>
-    <div id="monthTimeline"></div>
+
+    <div id="calendarPlanPanel">
+      <input id="eventTitle" placeholder="予定">
+      <input id="eventTime" type="time">
+      <textarea id="eventMemo" placeholder="メモ"></textarea>
+      <button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button>
+      <div style="height:10px"></div>
+      <input id="photoInput" type="file" accept="image/*">
+      <input id="photoCaption" placeholder="写真のひとこと">
+      <button style="width:100%" onclick="addPhoto()">📷 写真を追加</button>
+      <div id="dayLog"></div>
+    </div>
+
+    <div id="calendarLogPanel" style="display:none">
+      <div class="filterRow" id="timelineFilters">
+        <button class="filterBtn active" onclick="setTimelineFilter('all',this)">全部</button>
+        <button class="filterBtn" onclick="setTimelineFilter('tx',this)">💰家計簿</button>
+        <button class="filterBtn" onclick="setTimelineFilter('quest',this)">🎯デイリー</button>
+        <button class="filterBtn" onclick="setTimelineFilter('event',this)">📅予定</button>
+        <button class="filterBtn" onclick="setTimelineFilter('photo',this)">📷写真</button>
+        <button class="filterBtn" onclick="setTimelineFilter('memo',this)">📝メモ</button>
+      </div>
+      <div class="row"><button onclick="moveTimelineDay(-1)">← 前日</button><b id="timelineDayTitle"></b><button onclick="moveTimelineDay(1)">翌日 →</button></div>
+      <div id="dayTimeline"></div>
+    </div>
+
+    <div id="calendarMonthPanel" style="display:none">
+      <div class="monthnav"><button onclick="moveTimelineMonth(-1)">←</button><b id="timelineMonthTitle"></b><button onclick="moveTimelineMonth(1)">→</button></div>
+      <div class="grid2">
+        <div class="summarybox"><div class="muted">収支</div><div class="summarynum" id="tmNet"></div></div>
+        <div class="summarybox"><div class="muted">支出</div><div class="summarynum" id="tmExpense"></div></div>
+        <div class="summarybox"><div class="muted">デイリー結果</div><div class="summarynum" id="tmQuest"></div></div>
+        <div class="summarybox"><div class="muted">写真 / メモ</div><div class="summarynum" id="tmLogs"></div></div>
+      </div>
+      <div id="monthTimeline"></div>
+    </div>
   </div>
-</div>
+
+  <div class="card">
+    <div class="row"><h2>🔎 記録を検索</h2><button onclick="clearSearch()">クリア</button></div>
+    <input id="searchInput" placeholder="家計簿・予定・デイリー・メモを検索" oninput="renderSearch()">
+    <div id="searchResults"></div>
+  </div>
+
+  <!-- Compatibility elements retained for old timeline functions -->
+  <button id="dayModeBtn" style="display:none"></button>
+  <button id="monthModeBtn" style="display:none"></button>
+  <div id="timelineDay" style="display:none"></div>
+  <div id="timelineMonth" style="display:none"></div>
 </section>
+
+
 <section id="quests" class="screen">
 <div class="card"><h2>🎯 デイリークエスト作成</h2>
 <input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date">
@@ -190,7 +228,12 @@
   <button class="dangerWide" onclick="resetAllData()">🗑 データを初期化</button>
 </div>
 </section>
-</main><button class="settingsFab" aria-label="設定" onclick="tab('settings')">⚙️</button><nav class="nav"><button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button><button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button><button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>予定</button><button class="tab" data-id="timeline" onclick="tab('timeline')"><b>🕒</b>ログ</button><button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>デイリー</button></nav>
+</main><button class="settingsFab" aria-label="設定" onclick="tab('settings')">⚙️</button><nav class="nav">
+<button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button>
+<button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button>
+<button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>カレンダー</button>
+<button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>デイリー</button>
+</nav>
 <script>
 const K='jinseiSimV41';let D=JSON.parse(localStorage.getItem(K)||'null')||{title:'人生シム 大陸編',money:0,mood:{},tx:[],events:[],quests:[],memos:[],rewards:{weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''}};
 if(!D.rewards)D.rewards={weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''};
@@ -322,7 +365,7 @@ function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.s
 function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
 function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventMemo').value='';save();render()}function delEvent(id){D.events=D.events.filter(x=>x.id!==id);save();render()}
-function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}function pick(k){selected=k;render()}
+function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);timelineMonthDate=new Date(view.getFullYear(),view.getMonth(),1);renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}function pick(k){selected=k;timelineDate=new Date(k+'T12:00:00');timelineMonthDate=new Date(timelineDate.getFullYear(),timelineDate.getMonth(),1);render();}
 async function addPhoto(){let f=$('photoInput').files[0];if(!f)return alert('写真を選んでください');let data=await resize(f);D.events.push({id:Date.now(),kind:'photo',date:selected,title:$('photoCaption').value||'写真',data,createdAt:Date.now()});try{save()}catch(e){D.events.pop();return alert('保存容量がいっぱいです')} $('photoInput').value='';$('photoCaption').value='';render()}
 function resize(f){return new Promise(r=>{let fr=new FileReader();fr.onload=()=>{let im=new Image();im.onload=()=>{let s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.65))};im.src=fr.result};fr.readAsDataURL(f)})}
 function renameApp(){let v=$('titleInput').value.trim();if(v){D.title=v;save();render()}}
@@ -347,16 +390,21 @@ function renderSearch(){
  $('searchResults').innerHTML=out.length?out.slice(0,40).map(x=>`<div class="searchResult"><b>${x.icon} ${x.title}</b><div class="muted">${x.sub}</div></div>`).join(''):'<div class="muted">見つかりませんでした。</div>';
 }
 
-function setTimelineMode(mode){
- timelineMode=mode;
- $('dayModeBtn').classList.toggle('active',mode==='day');
- $('monthModeBtn').classList.toggle('active',mode==='month');
- $('timelineDay').style.display=mode==='day'?'block':'none';
- $('timelineMonth').style.display=mode==='month'?'block':'none';
- renderTimeline();
+
+function setCalendarPanel(mode){
+ ['plan','log','month'].forEach(x=>{
+   let p=$(x==='plan'?'calendarPlanPanel':x==='log'?'calendarLogPanel':'calendarMonthPanel');
+   let b=$(x==='plan'?'calPlanBtn':x==='log'?'calLogBtn':'calMonthBtn');
+   if(p)p.style.display=x===mode?'block':'none';
+   if(b)b.classList.toggle('active',x===mode);
+ });
+ if(mode==='log')renderTimeline();
+ if(mode==='month')renderTimeline();
 }
-function moveTimelineDay(n){timelineDate.setDate(timelineDate.getDate()+n);renderTimeline()}
-function moveTimelineMonth(n){timelineMonthDate=new Date(timelineMonthDate.getFullYear(),timelineMonthDate.getMonth()+n,1);renderTimeline()}
+
+function setTimelineMode(mode){timelineMode=mode;setCalendarPanel(mode==='month'?'month':'log');renderTimeline();}
+function moveTimelineDay(n){timelineDate.setDate(timelineDate.getDate()+n);selected=dk(timelineDate);view=new Date(timelineDate.getFullYear(),timelineDate.getMonth(),1);render();}
+function moveTimelineMonth(n){timelineMonthDate=new Date(timelineMonthDate.getFullYear(),timelineMonthDate.getMonth()+n,1);view=new Date(timelineMonthDate);render();setCalendarPanel('month')}
 function timeOf(ts){if(!ts)return '';let d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function eventTimeToMinutes(t){if(!t)return 0;let p=t.split(':');return Number(p[0])*60+Number(p[1])}
 function timelineItemsForDate(k){
@@ -372,6 +420,7 @@ function timelineItemsForDate(k){
  if(timelineFilter!=='all')a=a.filter(x=>x.kind===timelineFilter);return a.sort((x,y)=>y.sort-x.sort);
 }
 function renderTimeline(){
+ if(!$('timelineDayTitle')||!$('timelineMonthTitle'))return;
  let k=dk(timelineDate),days='日月火水木金土',items=timelineItemsForDate(k);
  $('timelineDayTitle').textContent=`${timelineDate.getMonth()+1}/${timelineDate.getDate()}（${days[timelineDate.getDay()]}）`;
  $('dayTimeline').innerHTML=items.length?`<div class="tl">${items.map(x=>`<div class="tl-item"><div class="tl-time">${x.time||'記録'}</div><b>${x.icon} ${x.text}</b>${x.sub?`<div class="muted">${x.sub}</div>`:''}${x.photo?`<img class="miniPhoto" src="${x.photo}">`:''}</div>`).join('')}</div>`:'<div class="muted" style="padding:18px 0">この日の記録はまだありません。</div>';
@@ -571,8 +620,17 @@ function toggleDailySection(name){
  if(icon)icon.textContent=el.classList.contains('collapsed')?'＋':'−';
 }
 
+
+function toggleHomeDaily(){
+ let body=$('homeDailyBody'),btn=$('homeDailyToggle');
+ if(!body||!btn)return;
+ let opening=body.style.display==='none';
+ body.style.display=opening?'block':'none';
+ btn.textContent=opening?'閉じる':'開く';
+}
+
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
+function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let todayHomeQs=D.quests.filter(x=>questPlanDate(x)===todayKey);$('nextQuest').innerHTML=todayHomeQs.length?todayHomeQs.map(x=>{let st=x.status||'pending';return `<div class="dailyItem"><div class="dailyTop"><div><div class="dailyTitle">${x.title}</div>${x.memo?`<div class="dailyMeta">${x.memo}</div>`:''}<span class="statusMini ${st}">${st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち'}</span></div></div><div class="dailyActions open"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'今日のデイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
  let itemHtml=x=>{
    let st=x.status||'pending';
