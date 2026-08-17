@@ -11,6 +11,9 @@
 .resultBtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.achieve{background:#def7e7;color:#287b4a}.miss{background:#ffeded;color:#a74c4c}.pending{background:#eef5f8;color:#667c89}
 .resultTag{display:inline-block;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:900;margin-top:5px}.resultTag.achieved{background:#dff7e8;color:#277d4b}.resultTag.missed{background:#ffe9e9;color:#a54a4a}.resultTag.pending{background:#edf3f6;color:#718590}.monthnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.miniPhoto{width:70px;height:70px;object-fit:cover;border-radius:12px;margin-top:6px}
 .setupOverlay{position:fixed;inset:0;background:linear-gradient(#9edcff,#dff8f2);z-index:9999;display:none;align-items:center;justify-content:center;padding:22px}.setupOverlay.show{display:flex}.setupCard{background:#ffffffee;border-radius:28px;padding:24px;width:min(100%,480px);box-shadow:0 18px 50px #416b7a33}.setupCard h1{margin:0 0 8px}.setupCard input{margin:7px 0}.shareBtn{width:100%;margin-top:10px}
+.settingsFab{position:fixed;right:8px;bottom:82px;width:46px;height:46px;border-radius:50%;background:#ffffffee;box-shadow:0 6px 18px #4667792b;z-index:12;font-size:22px;padding:0;display:flex;align-items:center;justify-content:center}
+.settingsCard .section{padding:10px 0;border-bottom:1px solid #deebef}.settingsCard .section:last-child{border-bottom:0}
+.dangerWide{width:100%;background:#ffe7e7;color:#a33e3e;margin-top:8px}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -30,13 +33,13 @@
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
 <section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 次のクエスト</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
 <div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
-<section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">記録</button></div><div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
+<section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">1日ログ</button></div><div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
 <section id="calendar" class="screen"><div class="card"><div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div><div class="calendar" id="cal"></div></div><div class="card"><h2>📅 <span id="selDate"></span></h2><input id="eventTitle" placeholder="予定"><input id="eventTime" type="time"><textarea id="eventMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button><input id="photoInput" type="file" accept="image/*"><input id="photoCaption" placeholder="写真のひとこと"><button style="width:100%" onclick="addPhoto()">📷 写真を追加</button><div id="dayLog"></div></div></section>
 
 <section id="timeline" class="screen">
 <div class="card">
   <div class="row"><h2>🕒 タイムライン</h2><span class="muted">人生ログ</span></div>
-  <div class="seg"><button id="dayModeBtn" class="active" onclick="setTimelineMode('day')">日ごと</button><button id="monthModeBtn" onclick="setTimelineMode('month')">月ごと</button></div>
+  <div class="seg"><button id="dayModeBtn" class="active" onclick="setTimelineMode('day')">1日ログ</button><button id="monthModeBtn" onclick="setTimelineMode('month')">月間まとめ</button></div>
   <div id="timelineDay">
     <div class="row"><button onclick="moveTimelineDay(-1)">← 前日</button><b id="timelineDayTitle"></b><button onclick="moveTimelineDay(1)">翌日 →</button></div>
     <div id="dayTimeline"></div>
@@ -56,17 +59,50 @@
 <section id="quests" class="screen">
 <div class="card"><h2>🎯 クエスト作成</h2><input id="qTitle" placeholder="クエスト名"><input id="qDue" type="date"><textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
 <div class="card">
-<button class="settingsToggle" onclick="toggleRewardSettings()"><b>🎁 ご褒美設定</b><span id="rewardToggleIcon">＋</span></button>
-<div id="rewardSettings" class="detailsBox">
-<div class="muted">週間</div><div class="grid2"><input id="weekThreshold" type="number" min="1" max="100" inputmode="numeric" placeholder="必要達成率 %"><input id="weekReward" placeholder="例：好きな物を食べる"></div>
-<div class="muted" style="margin-top:8px">月間</div><div class="grid2"><input id="monthThreshold" type="number" min="1" max="100" inputmode="numeric" placeholder="必要達成率 %"><input id="monthReward" placeholder="例：欲しい物を買う"></div>
-<button class="primary" style="width:100%;margin-top:8px" onclick="saveRewards()">ご褒美設定を保存</button><button class="shareBtn" onclick="shareApp()">📤 友達にシムレポートを共有</button>
-<div class="muted" style="margin-top:8px">期間内のクエストをすべて「達成 / 未達成」にした時点で判定します。</div>
-</div></div>
+<h2>🎁 ご褒美内容</h2>
+<div class="muted">週間ご褒美</div>
+<input id="weekReward" placeholder="例：好きな物を食べる">
+<div class="muted" style="margin-top:8px">月間ご褒美</div>
+<input id="monthReward" placeholder="例：欲しい物を買う">
+<button class="primary" style="width:100%;margin-top:8px" onclick="saveRewardContents()">ご褒美内容を保存</button>
+<div class="muted" style="margin-top:8px">達成率ラインは⚙️設定から変更できます。</div>
+</div>
 <div class="card"><h2>📜 クエスト</h2><div class="muted" style="margin-bottom:8px">判定はあとから変更できます。ログには最新の判定だけ反映されます。</div><div id="qList"></div></div>
 </section>
 <section id="more" class="screen"><div class="card"><h2>📝 メモ</h2><textarea id="memo" placeholder="自由にメモ…"></textarea><button class="primary" style="width:100%" onclick="addMemo()">保存</button><div id="memoList"></div></div><div class="card"><h2>⚙️ 設定</h2><div class="muted">アプリ内の名前</div><input id="titleInput"><button style="width:100%" onclick="renameApp()">名前を変更</button><button style="width:100%;margin-top:12px" onclick="exportData()">📤 バックアップ</button><input id="restore" type="file" accept=".json"><button style="width:100%" onclick="restoreData()">📥 復元</button></div></section>
-</main><nav class="nav"><button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button><button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button><button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>予定</button><button class="tab" data-id="timeline" onclick="tab('timeline')"><b>🕒</b>ログ</button><button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>クエスト</button></nav>
+
+<section id="settings" class="screen">
+<div class="card settingsCard">
+  <h2>⚙️ シムレポート設定</h2>
+  <div class="section">
+    <div class="muted">プレイヤー名</div>
+    <input id="settingsPlayer" placeholder="プレイヤー名">
+  </div>
+  <div class="section">
+    <div class="muted">画面上部のタイトル</div>
+    <input id="settingsTitle" placeholder="シムレポート">
+  </div>
+  <div class="section">
+    <h2 style="font-size:17px">🎁 ご褒美ライン</h2>
+    <div class="grid2">
+      <div><div class="muted">週間</div><input id="settingsWeekThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
+      <div><div class="muted">月間</div><input id="settingsMonthThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
+    </div>
+    <div class="muted">例：80なら達成率80%以上でご褒美解放。</div>
+  </div>
+  <button class="primary" style="width:100%;margin-top:10px" onclick="saveAppSettings()">設定を保存</button>
+</div>
+
+<div class="card">
+  <h2>📤 共有・データ</h2>
+  
+  <button style="width:100%;margin-top:8px" onclick="exportData()">📦 バックアップを書き出す</button>
+  <input id="restoreSettings" type="file" accept=".json,application/json">
+  <button style="width:100%" onclick="restoreDataFromSettings()">📥 バックアップから復元</button>
+  <button class="dangerWide" onclick="resetAllData()">🗑 データを初期化</button>
+</div>
+</section>
+</main><button class="settingsFab" aria-label="設定" onclick="tab('settings')">⚙️</button><nav class="nav"><button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button><button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button><button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>予定</button><button class="tab" data-id="timeline" onclick="tab('timeline')"><b>🕒</b>ログ</button><button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>クエスト</button></nav>
 <script>
 const K='jinseiSimV41';let D=JSON.parse(localStorage.getItem(K)||'null')||{title:'人生シム 大陸編',money:0,mood:{},tx:[],events:[],quests:[],memos:[],rewards:{weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''}};
 if(!D.rewards)D.rewards={weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''};
@@ -205,7 +241,35 @@ function checkFirstRun(){
  }
 }
 
+
+function saveRewardContents(){
+ D.rewards.weekReward=$('weekReward').value.trim();
+ D.rewards.monthReward=$('monthReward').value.trim();
+ save();render();
+}
+function saveAppSettings(){
+ D.player=$('settingsPlayer').value.trim();
+ let t=$('settingsTitle').value.trim();
+ if(t)D.title=t;
+ D.rewards.weekThreshold=Math.max(1,Math.min(100,Number($('settingsWeekThreshold').value)||80));
+ D.rewards.monthThreshold=Math.max(1,Math.min(100,Number($('settingsMonthThreshold').value)||80));
+ save();render();tab('home');
+}
+function restoreDataFromSettings(){
+ let f=$('restoreSettings').files[0];
+ if(!f)return alert('バックアップファイルを選んでください');
+ let r=new FileReader();
+ r.onload=()=>{try{D=JSON.parse(r.result);if(!D.rewards)D.rewards={weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''};save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
+ r.readAsText(f);
+}
+function resetAllData(){
+ if(!confirm('シムレポートのデータをすべて初期化しますか？'))return;
+ if(!confirm('家計簿・クエスト・メモ・写真なども消えます。本当に初期化しますか？'))return;
+ localStorage.removeItem(K);
+ location.reload();
+}
+
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let q=D.quests.find(x=>!x.status||x.status==='pending');$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'判定待ちクエストなし';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div>`).join(''):'<div class="muted">履歴なし</div>';$('qList').innerHTML=D.quests.length?D.quests.map(x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'なし';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekThreshold').value=D.rewards.weekThreshold;$('weekReward').value=D.rewards.weekReward;$('monthThreshold').value=D.rewards.monthThreshold;$('monthReward').value=D.rewards.monthReward;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline()}
+function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let q=D.quests.find(x=>!x.status||x.status==='pending');$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'判定待ちクエストなし';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div>`).join(''):'<div class="muted">履歴なし</div>';$('qList').innerHTML=D.quests.length?D.quests.map(x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'なし';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline()}
 $('txDate').value=$('qDue').value=dk(new Date());['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
