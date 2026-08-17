@@ -34,6 +34,12 @@
 .dayClose{background:linear-gradient(135deg,#f0f9ff,#f5fff8);border:1px solid #d5eaf0}.closeSummary{background:#fff;border-radius:14px;padding:10px;margin-top:9px}.closeDone{background:#e7f7ed;color:#277d4b}.closeMiss{background:#ffeaea;color:#a54d4d}
 .nav .tab{min-width:0}.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 14px}.seg button{padding:9px 6px;font-size:12px}.seg button.active{background:#dff3fb;color:#2d647c;font-weight:900}
 #calendarLogPanel,#calendarMonthPanel{padding-top:4px}
+.weekdayGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px}
+.weekdayChip{display:block;position:relative}.weekdayChip input{position:absolute;opacity:0;pointer-events:none}
+.weekdayChip span{display:flex;align-items:center;justify-content:center;height:42px;border-radius:12px;background:#eef7fa;border:2px solid transparent;font-weight:900;color:#426173}
+.weekdayChip input:checked+span{background:#dff7e8;border-color:#63c58b;color:#277d4b}
+.weekdayChip.sun span{color:#bd5d5d}.weekdayChip.sat span{color:#5b6fc2}
+.weekdayChip.sun input:checked+span,.weekdayChip.sat input:checked+span{color:#277d4b}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -161,9 +167,27 @@
 
 <section id="quests" class="screen">
 <div class="card"><h2>🎯 デイリークエスト作成</h2>
-<input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date">
-<select id="qRepeat"><option value="none">この日だけ</option><option value="daily">毎日</option><option value="weekday">平日（月〜金）</option><option value="weekly">毎週この曜日</option></select>
-<textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
+<input id="qTitle" placeholder="クエストを入力">
+<input id="qDue" type="date">
+<select id="qRepeat" onchange="toggleWeekdayPicker()">
+  <option value="none">今日</option>
+  <option value="daily">毎日</option>
+  <option value="customDays">曜日を選ぶ</option>
+</select>
+<div id="weekdayPicker" style="display:none">
+  <div class="muted" style="margin:6px 0 8px">繰り返す曜日を複数選べます</div>
+  <div class="weekdayGrid">
+    <label class="weekdayChip sun"><input class="weekdayCheck" type="checkbox" value="0"><span>日</span></label>
+    <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="1"><span>月</span></label>
+    <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="2"><span>火</span></label>
+    <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="3"><span>水</span></label>
+    <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="4"><span>木</span></label>
+    <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="5"><span>金</span></label>
+    <label class="weekdayChip sat"><input class="weekdayCheck" type="checkbox" value="6"><span>土</span></label>
+  </div>
+</div>
+<textarea id="qMemo" placeholder="メモ"></textarea>
+<button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
 <div class="card"><h2>🔁 繰り返しデイリー</h2><div class="muted">繰り返しデイリーは、その日になった時だけ今日のデイリーとして自動追加されます。</div><div id="dailyTemplateList"></div></div>
 <div class="card">
 <h2>🎁 ご褒美内容</h2>
@@ -324,16 +348,51 @@ function delTx(id){
  D.tx=D.tx.filter(x=>x.id!==id);
  save();render();
 }
+
+function selectedRepeatDays(){
+ return [...document.querySelectorAll('.weekdayCheck:checked')].map(x=>Number(x.value));
+}
+function clearRepeatDays(){
+ document.querySelectorAll('.weekdayCheck').forEach(x=>x.checked=false);
+}
+function toggleWeekdayPicker(){
+ let picker=$('weekdayPicker'),repeat=$('qRepeat').value;
+ if(!picker)return;
+ picker.style.display=repeat==='customDays'?'block':'none';
+ if(repeat==='customDays' && selectedRepeatDays().length===0){
+   let due=$('qDue').value||dk(new Date());
+   let d=new Date(due+'T12:00:00').getDay();
+   let cb=document.querySelector('.weekdayCheck[value="'+d+'"]');
+   if(cb)cb.checked=true;
+ }
+}
+function repeatLabel(t){
+ if(t.repeat==='daily')return '毎日';
+ if(t.repeat==='weekday')return '平日';
+ if(t.repeat==='weekly'){
+   let d=new Date(t.start+'T12:00:00').getDay();
+   return '毎週'+('日月火水木金土'[d])+'曜';
+ }
+ if(t.repeat==='customDays'){
+   let names='日月火水木金土';
+   let ds=(t.days||[]).slice().sort((a,b)=>a-b);
+   return ds.map(d=>names[d]).join('・')+'曜';
+ }
+ return '繰り返し';
+}
+
 function addQuest(){
- let title=$('qTitle').value.trim();if(!title)return;
+ let title=$('qTitle').value.trim();if(!title)return alert('クエストを入力してください');
  let due=$('qDue').value||dk(new Date()),repeat=$('qRepeat').value,memo=$('qMemo').value;
  if(repeat==='none'){
    D.quests.unshift({id:Date.now(),title,due,memo,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null});
  }else{
-   let tid=Date.now();
-   D.dailyTemplates.push({id:tid,title,memo,start:due,repeat,active:true});
+   let tid=Date.now(),days=repeat==='customDays'?selectedRepeatDays():[];
+   if(repeat==='customDays'&&!days.length)return alert('繰り返す曜日を選んでください');
+   D.dailyTemplates.push({id:tid,title,memo,start:due,repeat,days,active:true});
  }
  $('qTitle').value='';$('qMemo').value='';$('qRepeat').value='none';
+ clearRepeatDays();toggleWeekdayPicker();
  ensureDailyQuests();save();render();
 }
 function delDailyTemplate(id){
@@ -346,6 +405,7 @@ function templateMatchesDate(t,dateStr){
  if(t.repeat==='daily')return true;
  if(t.repeat==='weekday')return d.getDay()>=1&&d.getDay()<=5;
  if(t.repeat==='weekly')return d.getDay()===s.getDay();
+ if(t.repeat==='customDays')return (t.days||[]).includes(d.getDay());
  return false;
 }
 function ensureDailyQuests(){
@@ -673,6 +733,6 @@ function render(){let n=summary();$('appTitle').textContent=D.title;let st=$('se
    section('today','今日',todayQs,false)+
    section('future','今後（単発）',futureQs,true)+
    section('past','過去',pastQs,true);
-}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
+}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
