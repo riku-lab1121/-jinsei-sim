@@ -14,6 +14,9 @@
 .settingsFab{position:fixed;right:8px;bottom:82px;width:46px;height:46px;border-radius:50%;background:#ffffffee;box-shadow:0 6px 18px #4667792b;z-index:12;font-size:22px;padding:0;display:flex;align-items:center;justify-content:center}
 .settingsCard .section{padding:10px 0;border-bottom:1px solid #deebef}.settingsCard .section:last-child{border-bottom:0}
 .dangerWide{width:100%;background:#ffe7e7;color:#a33e3e;margin-top:8px}
+.filterRow{display:flex;gap:6px;overflow-x:auto;padding:8px 0}.filterBtn{white-space:nowrap;padding:8px 10px}.filterBtn.active{background:#66c68a;color:#fff}
+.template{background:#f6fbfd;border-radius:14px;padding:11px;margin-top:8px}
+.searchResult{padding:10px 0;border-bottom:1px solid #deebef}.searchResult:last-child{border:0}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -33,12 +36,37 @@
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
 <section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 今日のデイリー</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
 <div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
-<section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">保存</button></div><div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
+<section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">保存</button></div><div class="card">
+<h2>🔁 定期収支</h2>
+<div class="grid2">
+<select id="rtxType"><option value="expense">支出</option><option value="income">収入</option></select>
+<select id="rtxCat"><option>固定費</option><option>食費</option><option>交通</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select>
+</div>
+<input id="rtxAmount" type="number" inputmode="decimal" placeholder="金額">
+<input id="rtxMemo" placeholder="例：携帯料金 / 給料">
+<div class="grid2"><div><div class="muted">毎月何日</div><input id="rtxDay" type="number" min="1" max="31" value="1"></div><div><div class="muted">開始月</div><input id="rtxStart" type="month"></div></div>
+<button class="primary" style="width:100%" onclick="addRecurringTx()">定期収支を追加</button>
+<div id="rtxList"></div>
+</div>
+<div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
 <section id="calendar" class="screen"><div class="card"><div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div><div class="calendar" id="cal"></div></div><div class="card"><h2>📅 <span id="selDate"></span></h2><input id="eventTitle" placeholder="予定"><input id="eventTime" type="time"><textarea id="eventMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button><input id="photoInput" type="file" accept="image/*"><input id="photoCaption" placeholder="写真のひとこと"><button style="width:100%" onclick="addPhoto()">📷 写真を追加</button><div id="dayLog"></div></div></section>
 
 <section id="timeline" class="screen">
 <div class="card">
   <div class="row"><h2>🕒 タイムライン</h2><span class="muted">人生ログ</span></div>
+<div class="filterRow" id="timelineFilters">
+<button class="filterBtn active" onclick="setTimelineFilter('all',this)">全部</button>
+<button class="filterBtn" onclick="setTimelineFilter('tx',this)">💰家計簿</button>
+<button class="filterBtn" onclick="setTimelineFilter('quest',this)">🎯デイリー</button>
+<button class="filterBtn" onclick="setTimelineFilter('event',this)">📅予定</button>
+<button class="filterBtn" onclick="setTimelineFilter('photo',this)">📷写真</button>
+<button class="filterBtn" onclick="setTimelineFilter('memo',this)">📝メモ</button>
+</div>
+<div class="card" style="margin:8px 0 12px;padding:12px">
+<div class="row"><b>🔎 検索</b><button onclick="clearSearch()">クリア</button></div>
+<input id="searchInput" placeholder="家計簿・予定・デイリー・メモを検索" oninput="renderSearch()">
+<div id="searchResults"></div>
+</div>
   <div class="seg"><button id="dayModeBtn" class="active" onclick="setTimelineMode('day')">1日ログ</button><button id="monthModeBtn" onclick="setTimelineMode('month')">月間まとめ</button></div>
   <div id="timelineDay">
     <div class="row"><button onclick="moveTimelineDay(-1)">← 前日</button><b id="timelineDayTitle"></b><button onclick="moveTimelineDay(1)">翌日 →</button></div>
@@ -49,7 +77,7 @@
     <div class="grid2">
       <div class="summarybox"><div class="muted">収支</div><div class="summarynum" id="tmNet"></div></div>
       <div class="summarybox"><div class="muted">支出</div><div class="summarynum" id="tmExpense"></div></div>
-      <div class="summarybox"><div class="muted">完了クエスト</div><div class="summarynum" id="tmQuest"></div></div>
+      <div class="summarybox"><div class="muted">デイリー結果</div><div class="summarynum" id="tmQuest"></div></div>
       <div class="summarybox"><div class="muted">写真 / メモ</div><div class="summarynum" id="tmLogs"></div></div>
     </div>
     <div id="monthTimeline"></div>
@@ -57,7 +85,11 @@
 </div>
 </section>
 <section id="quests" class="screen">
-<div class="card"><h2>🎯 デイリークエスト作成</h2><input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date"><textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
+<div class="card"><h2>🎯 デイリークエスト作成</h2>
+<input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date">
+<select id="qRepeat"><option value="none">この日だけ</option><option value="daily">毎日</option><option value="weekday">平日（月〜金）</option><option value="weekly">毎週この曜日</option></select>
+<textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
+<div class="card"><h2>🔁 繰り返しデイリー</h2><div class="muted">登録した繰り返しは自動で今日以降のデイリーを作ります。</div><div id="dailyTemplateList"></div></div>
 <div class="card">
 <h2>🎁 ご褒美内容</h2>
 <div class="muted">週間ご褒美</div>
@@ -114,6 +146,8 @@ const K='jinseiSimV41';let D=JSON.parse(localStorage.getItem(K)||'null')||{title
 if(!D.rewards)D.rewards={weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''};
 if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
 if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
+if(!D.recurringTx)D.recurringTx=[];
+if(!D.dailyTemplates)D.dailyTemplates=[];
 if(typeof D.player!=='string')D.player='';
 if(D.title==='人生シム 大陸編')D.title='シムレポート';
 if(typeof D.setupDone!=='boolean')D.setupDone=false;
@@ -126,6 +160,32 @@ function summary(){let n=new Date(),p=n.getFullYear()+'-'+String(n.getMonth()+1)
 function setMood(v){let k=dk(new Date());D.mood[k]={value:v,createdAt:Date.now()};save();render()}
 function moodValue(k){let v=D.mood[k];return typeof v==='string'?v:(v&&v.value)||null}
 function addTx(){let a=Number($('txAmount').value);if(!a)return alert('金額を入力してください');D.tx.unshift({id:Date.now(),type:$('txType').value,cat:$('txCat').value,amount:a,memo:$('txMemo').value,date:$('txDate').value||dk(new Date()),createdAt:Date.now()});D.money+=$('txType').value==='income'?a:-a;$('txAmount').value='';$('txMemo').value='';save();render()}
+
+function addRecurringTx(){
+ let amount=Number($('rtxAmount').value),day=Math.max(1,Math.min(31,Number($('rtxDay').value)||1));
+ if(!amount)return alert('金額を入力してください');
+ let start=$('rtxStart').value||dk(new Date()).slice(0,7);
+ D.recurringTx.push({id:Date.now(),type:$('rtxType').value,cat:$('rtxCat').value,amount,memo:$('rtxMemo').value.trim(),day,start,active:true});
+ $('rtxAmount').value='';$('rtxMemo').value='';save();ensureRecurringTx();render();
+}
+function delRecurringTx(id){
+ if(!confirm('この定期収支設定を削除しますか？'))return;
+ D.recurringTx=D.recurringTx.filter(x=>x.id!==id);save();render();
+}
+function ensureRecurringTx(){
+ let now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+ (D.recurringTx||[]).filter(x=>x.active!==false&&x.start<=ym).forEach(r=>{
+   let maxDay=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),day=Math.min(r.day,maxDay);
+   let date=ym+'-'+String(day).padStart(2,'0');
+   if(date>dk(now))return;
+   if(D.tx.some(t=>t.recurringId===r.id&&t.date===date))return;
+   let id=Date.now()+Math.floor(Math.random()*1000);
+   D.tx.unshift({id,type:r.type,cat:r.cat,amount:r.amount,memo:r.memo,date,createdAt:Date.now(),recurringId:r.id});
+   D.money+=r.type==='income'?r.amount:-r.amount;
+ });
+ save();
+}
+
 function delTx(id){
  let tx=D.tx.find(x=>x.id===id);
  if(!tx)return;
@@ -134,13 +194,47 @@ function delTx(id){
  D.tx=D.tx.filter(x=>x.id!==id);
  save();render();
 }
-function addQuest(){if(!$('qTitle').value.trim())return;D.quests.unshift({id:Date.now(),title:$('qTitle').value.trim(),due:$('qDue').value,memo:$('qMemo').value,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null});$('qTitle').value='';$('qMemo').value='';save();render()}
+function addQuest(){
+ let title=$('qTitle').value.trim();if(!title)return;
+ let due=$('qDue').value||dk(new Date()),repeat=$('qRepeat').value,memo=$('qMemo').value;
+ if(repeat==='none'){
+   D.quests.unshift({id:Date.now(),title,due,memo,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null});
+ }else{
+   let tid=Date.now();
+   D.dailyTemplates.push({id:tid,title,memo,start:due,repeat,active:true});
+ }
+ $('qTitle').value='';$('qMemo').value='';$('qRepeat').value='none';
+ ensureDailyQuests();save();render();
+}
+function delDailyTemplate(id){
+ if(!confirm('この繰り返しデイリー設定を削除しますか？'))return;
+ D.dailyTemplates=D.dailyTemplates.filter(x=>x.id!==id);save();render();
+}
+function templateMatchesDate(t,dateStr){
+ let d=new Date(dateStr+'T12:00:00'),s=new Date(t.start+'T12:00:00');
+ if(dateStr<t.start)return false;
+ if(t.repeat==='daily')return true;
+ if(t.repeat==='weekday')return d.getDay()>=1&&d.getDay()<=5;
+ if(t.repeat==='weekly')return d.getDay()===s.getDay();
+ return false;
+}
+function ensureDailyQuests(){
+ let today=new Date(),end=new Date();end.setDate(end.getDate()+14);
+ (D.dailyTemplates||[]).filter(t=>t.active!==false).forEach(t=>{
+   for(let d=new Date(t.start+'T12:00:00');d<=end;d.setDate(d.getDate()+1)){
+     let k=dk(d);if(!templateMatchesDate(t,k))continue;
+     if(D.quests.some(q=>q.templateId===t.id&&questPlanDate(q)===k))continue;
+     D.quests.push({id:Date.now()+Math.floor(Math.random()*100000),title:t.title,due:k,memo:t.memo,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null,templateId:t.id});
+   }
+ });
+ save();
+}
 function setQuestResult(id,status){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status=status;q.done=status==='achieved';q.resultAt=Date.now();q.completedAt=status==='achieved'?q.resultAt:null;save();render()}
 function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status='pending';q.done=false;q.resultAt=null;q.completedAt=null;save();render()}
 function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
 function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventMemo').value='';save();render()}function delEvent(id){D.events=D.events.filter(x=>x.id!==id);save();render()}
-function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline()}function pick(k){selected=k;render()}
+function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline();renderSearch()}function pick(k){selected=k;render()}
 async function addPhoto(){let f=$('photoInput').files[0];if(!f)return alert('写真を選んでください');let data=await resize(f);D.events.push({id:Date.now(),kind:'photo',date:selected,title:$('photoCaption').value||'写真',data,createdAt:Date.now()});try{save()}catch(e){D.events.pop();return alert('保存容量がいっぱいです')} $('photoInput').value='';$('photoCaption').value='';render()}
 function resize(f){return new Promise(r=>{let fr=new FileReader();fr.onload=()=>{let im=new Image();im.onload=()=>{let s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.65))};im.src=fr.result};fr.readAsDataURL(f)})}
 function renameApp(){let v=$('titleInput').value.trim();if(v){D.title=v;save();render()}}
@@ -148,7 +242,22 @@ function exportData(){let b=new Blob([JSON.stringify(D)],{type:'application/json
 function restoreData(){let f=$('restore').files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{D=JSON.parse(r.result);save();render();alert('復元しました')}catch(e){alert('読み込めませんでした')}};r.readAsText(f)}
 function cp(v){if(v==='C')expr='';else if(v==='⌫')expr=expr.slice(0,-1);else if(v==='='){try{let s=expr.replaceAll('×','*').replaceAll('÷','/');if(!/^[0-9+*/(). -]+$/.test(s))throw 0;expr=String(Math.round(Function('return ('+s+')')()*100)/100)}catch(e){expr='エラー'}}else{if(expr==='エラー')expr='';expr+=v}$('calcOut').textContent=expr||'0'}function useCalc(){let n=Number(expr);if(isFinite(n))$('txAmount').value=Math.abs(n)}
 
-let timelineMode='day',timelineDate=new Date(),timelineMonthDate=new Date();
+let timelineMode='day',timelineDate=new Date(),timelineMonthDate=new Date(),timelineFilter='all';
+
+
+function setTimelineFilter(f,btn){
+ timelineFilter=f;document.querySelectorAll('#timelineFilters .filterBtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');renderTimeline();
+}
+function clearSearch(){$('searchInput').value='';renderSearch()}
+function renderSearch(){
+ let q=($('searchInput')?.value||'').trim().toLowerCase(),out=[];
+ if(!q){$('searchResults').innerHTML='<div class="muted">文字を入力すると全体検索できます。</div>';return}
+ D.tx.forEach(x=>{let s=`${x.cat} ${x.memo||''} ${x.amount} ${x.date}`.toLowerCase();if(s.includes(q))out.push({icon:'💰',title:`${x.cat} ${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}`,sub:`${x.date} ${x.memo||''}`})});
+ D.quests.forEach(x=>{let s=`${x.title} ${x.memo||''} ${x.due||''}`.toLowerCase();if(s.includes(q))out.push({icon:'🎯',title:x.title,sub:`${x.due||''} ${x.status==='achieved'?'達成':x.status==='missed'?'未達成':'判定待ち'}`})});
+ D.events.forEach(x=>{let s=`${x.title||''} ${x.memo||''} ${x.date||''}`.toLowerCase();if(s.includes(q))out.push({icon:x.kind==='photo'?'📷':'📅',title:x.title||'写真',sub:x.date||''})});
+ D.memos.forEach(x=>{let s=`${x.text} ${x.date}`.toLowerCase();if(s.includes(q))out.push({icon:'📝',title:x.text,sub:x.date})});
+ $('searchResults').innerHTML=out.length?out.slice(0,40).map(x=>`<div class="searchResult"><b>${x.icon} ${x.title}</b><div class="muted">${x.sub}</div></div>`).join(''):'<div class="muted">見つかりませんでした。</div>';
+}
 
 function setTimelineMode(mode){
  timelineMode=mode;
@@ -164,15 +273,15 @@ function timeOf(ts){if(!ts)return '';let d=new Date(ts);return String(d.getHours
 function eventTimeToMinutes(t){if(!t)return 0;let p=t.split(':');return Number(p[0])*60+Number(p[1])}
 function timelineItemsForDate(k){
  let a=[];
- D.tx.filter(x=>x.date===k).forEach(x=>a.push({sort:x.createdAt||x.id||0,time:timeOf(x.createdAt||x.id),icon:'💰',text:`${x.cat} ${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}`,sub:x.memo||''}));
+ D.tx.filter(x=>x.date===k).forEach(x=>a.push({sort:x.createdAt||x.id||0,time:timeOf(x.createdAt||x.id),kind:'tx',icon:'💰',text:`${x.cat} ${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}`,sub:x.memo||''}));
  D.events.filter(x=>x.date===k).forEach(x=>{
-   if(x.kind==='photo') a.push({sort:x.createdAt||x.id||0,time:timeOf(x.createdAt||x.id),icon:'📷',text:x.title||'写真',photo:x.data});
-   else a.push({sort:x.time?eventTimeToMinutes(x.time)*60000:(x.createdAt||x.id||0),time:x.time||timeOf(x.createdAt||x.id),icon:'📅',text:x.title,sub:x.memo||''});
+   if(x.kind==='photo') a.push({sort:x.createdAt||x.id||0,time:timeOf(x.createdAt||x.id),kind:'photo',icon:'📷',text:x.title||'写真',photo:x.data});
+   else a.push({sort:x.time?eventTimeToMinutes(x.time)*60000:(x.createdAt||x.id||0),time:x.time||timeOf(x.createdAt||x.id),kind:'event',icon:'📅',text:x.title,sub:x.memo||''});
  });
- D.memos.forEach(x=>{let ts=x.createdAt||x.id||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),icon:'📝',text:x.text})});
- D.quests.filter(x=>x.status==='achieved'||x.status==='missed').forEach(x=>{let ts=x.resultAt||x.completedAt||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),icon:x.status==='achieved'?'✅':'❌',text:`${x.title} — ${x.status==='achieved'?'達成':'未達成'}`,sub:x.memo||''})});
- let mv=moodValue(k),mr=D.mood[k]; if(mv)a.push({sort:(mr&&mr.createdAt)||0,time:timeOf((mr&&mr.createdAt)||0),icon:'☀️',text:'今日の調子：'+mv});
- return a.sort((x,y)=>y.sort-x.sort);
+ D.memos.forEach(x=>{let ts=x.createdAt||x.id||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),kind:'memo',icon:'📝',text:x.text})});
+ D.quests.filter(x=>x.status==='achieved'||x.status==='missed').forEach(x=>{let ts=x.resultAt||x.completedAt||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),kind:'quest',icon:x.status==='achieved'?'✅':'❌',text:`${x.title} — ${x.status==='achieved'?'達成':'未達成'}`,sub:x.memo||''})});
+ let mv=moodValue(k),mr=D.mood[k]; if(mv)a.push({sort:(mr&&mr.createdAt)||0,time:timeOf((mr&&mr.createdAt)||0),kind:'mood',icon:'☀️',text:'今日の調子：'+mv});
+ if(timelineFilter!=='all')a=a.filter(x=>x.kind===timelineFilter);return a.sort((x,y)=>y.sort-x.sort);
 }
 function renderTimeline(){
  let k=dk(timelineDate),days='日月火水木金土',items=timelineItemsForDate(k);
@@ -293,7 +402,9 @@ function restoreDataFromSettings(){
  let r=new FileReader();
  r.onload=()=>{try{D=JSON.parse(r.result);if(!D.rewards)D.rewards={weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''};
 if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
-if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
+if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
+if(!D.recurringTx)D.recurringTx=[];
+if(!D.dailyTemplates)D.dailyTemplates=[];save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
  r.readAsText(f);
 }
 function resetAllData(){
@@ -304,7 +415,7 @@ function resetAllData(){
 }
 
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';{
+function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
  let itemHtml=x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:`<button class="danger" onclick="delPendingQuest(${x.id})">🗑 削除</button>`}</div></div>`};
  let todayQs=D.quests.filter(x=>questPlanDate(x)===today);
@@ -314,6 +425,6 @@ function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInpu
    `<div class="tl-date">今日</div>${todayQs.length?todayQs.map(itemHtml).join(''):'<div class="muted">今日のデイリーはありません。</div>'}`+
    `<div class="tl-date">今後</div>${futureQs.length?futureQs.map(itemHtml).join(''):'<div class="muted">予定なし</div>'}`+
    `<div class="tl-date">過去</div>${pastQs.length?pastQs.map(itemHtml).join(''):'<div class="muted">履歴なし</div>'}`;
-}$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline()}
-$('txDate').value=$('qDue').value=dk(new Date());['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
+}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch()}
+$('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
