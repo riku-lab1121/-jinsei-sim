@@ -31,7 +31,7 @@
  </div>
 </div><main>
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
-<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 次のクエスト</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
+<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card"><div class="row"><h2>🎯 今日のデイリー</h2><button onclick="tab('quests')">見る</button></div><div id="nextQuest" class="muted"></div></div>
 <div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
 <section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">保存</button></div><div class="card"><h2>📒 履歴</h2><div id="txList"></div></div></section>
 <section id="calendar" class="screen"><div class="card"><div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div><div class="calendar" id="cal"></div></div><div class="card"><h2>📅 <span id="selDate"></span></h2><input id="eventTitle" placeholder="予定"><input id="eventTime" type="time"><textarea id="eventMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addEvent()">予定を追加</button><input id="photoInput" type="file" accept="image/*"><input id="photoCaption" placeholder="写真のひとこと"><button style="width:100%" onclick="addPhoto()">📷 写真を追加</button><div id="dayLog"></div></div></section>
@@ -57,7 +57,7 @@
 </div>
 </section>
 <section id="quests" class="screen">
-<div class="card"><h2>🎯 クエスト作成</h2><input id="qTitle" placeholder="クエスト名"><input id="qDue" type="date"><textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
+<div class="card"><h2>🎯 デイリークエスト作成</h2><input id="qTitle" placeholder="デイリー名"><input id="qDue" type="date"><textarea id="qMemo" placeholder="メモ"></textarea><button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
 <div class="card">
 <h2>🎁 ご褒美内容</h2>
 <div class="muted">週間ご褒美</div>
@@ -67,7 +67,7 @@
 <button class="primary" style="width:100%;margin-top:8px" onclick="saveRewardContents()">ご褒美内容を保存</button>
 <div class="muted" style="margin-top:8px">達成率ラインは⚙️設定から変更できます。</div>
 </div>
-<div class="card"><h2>📜 クエスト</h2><div class="muted" style="margin-bottom:8px">判定はあとから変更できます。判定待ちのクエストは削除できます。ログには最新の判定だけ反映されます。</div><div id="qList"></div></div>
+<div class="card"><h2>📜 デイリークエスト</h2><div class="muted" style="margin-bottom:8px">判定はあとから変更できます。判定待ちのデイリーは削除できます。ログには最新の判定だけ反映されます。</div><div id="qList"></div></div>
 </section>
 <section id="more" class="screen"><div class="card"><h2>📝 メモ</h2><textarea id="memo" placeholder="自由にメモ…"></textarea><button class="primary" style="width:100%" onclick="addMemo()">保存</button><div id="memoList"></div></div><div class="card"><h2>⚙️ 設定</h2><div class="muted">アプリ内の名前</div><input id="titleInput"><button style="width:100%" onclick="renameApp()">名前を変更</button><button style="width:100%;margin-top:12px" onclick="exportData()">📤 バックアップ</button><input id="restore" type="file" accept=".json"><button style="width:100%" onclick="restoreData()">📥 復元</button></div></section>
 
@@ -83,12 +83,18 @@
     <input id="settingsTitle" placeholder="シムレポート">
   </div>
   <div class="section">
-    <h2 style="font-size:17px">🎁 ご褒美ライン</h2>
+    <h2 style="font-size:17px">🎁 ご褒美ルール</h2>
+    <div class="muted">週間</div>
     <div class="grid2">
-      <div><div class="muted">週間</div><input id="settingsWeekThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
-      <div><div class="muted">月間</div><input id="settingsMonthThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
+      <div><div class="muted">達成率 %</div><input id="settingsWeekThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
+      <div><div class="muted">必要デイリー数</div><input id="settingsWeekMinCount" type="number" min="1" max="99" inputmode="numeric"></div>
     </div>
-    <div class="muted">例：80なら達成率80%以上でご褒美解放。</div>
+    <div class="muted" style="margin-top:8px">月間</div>
+    <div class="grid2">
+      <div><div class="muted">達成率 %</div><input id="settingsMonthThreshold" type="number" min="1" max="100" inputmode="numeric"></div>
+      <div><div class="muted">必要デイリー数</div><input id="settingsMonthMinCount" type="number" min="1" max="999" inputmode="numeric"></div>
+    </div>
+    <div class="muted">必要件数以上を判定済みにして、達成率も超えるとご褒美解放。</div>
   </div>
   <button class="primary" style="width:100%;margin-top:10px" onclick="saveAppSettings()">設定を保存</button>
 </div>
@@ -102,10 +108,12 @@
   <button class="dangerWide" onclick="resetAllData()">🗑 データを初期化</button>
 </div>
 </section>
-</main><button class="settingsFab" aria-label="設定" onclick="tab('settings')">⚙️</button><nav class="nav"><button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button><button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button><button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>予定</button><button class="tab" data-id="timeline" onclick="tab('timeline')"><b>🕒</b>ログ</button><button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>クエスト</button></nav>
+</main><button class="settingsFab" aria-label="設定" onclick="tab('settings')">⚙️</button><nav class="nav"><button class="tab active" data-id="home" onclick="tab('home')"><b>🏠</b>ホーム</button><button class="tab" data-id="money" onclick="tab('money')"><b>💰</b>家計簿</button><button class="tab" data-id="calendar" onclick="tab('calendar')"><b>📅</b>予定</button><button class="tab" data-id="timeline" onclick="tab('timeline')"><b>🕒</b>ログ</button><button class="tab" data-id="quests" onclick="tab('quests')"><b>🎯</b>デイリー</button></nav>
 <script>
-const K='jinseiSimV41';let D=JSON.parse(localStorage.getItem(K)||'null')||{title:'人生シム 大陸編',money:0,mood:{},tx:[],events:[],quests:[],memos:[],rewards:{weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''}};
-if(!D.rewards)D.rewards={weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''};
+const K='jinseiSimV41';let D=JSON.parse(localStorage.getItem(K)||'null')||{title:'人生シム 大陸編',money:0,mood:{},tx:[],events:[],quests:[],memos:[],rewards:{weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''}};
+if(!D.rewards)D.rewards={weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''};
+if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
+if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
 if(typeof D.player!=='string')D.player='';
 if(D.title==='人生シム 大陸編')D.title='シムレポート';
 if(typeof D.setupDone!=='boolean')D.setupDone=false;
@@ -129,7 +137,7 @@ function delTx(id){
 function addQuest(){if(!$('qTitle').value.trim())return;D.quests.unshift({id:Date.now(),title:$('qTitle').value.trim(),due:$('qDue').value,memo:$('qMemo').value,status:'pending',done:false,createdAt:Date.now(),resultAt:null,completedAt:null});$('qTitle').value='';$('qMemo').value='';save();render()}
 function setQuestResult(id,status){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status=status;q.done=status==='achieved';q.resultAt=Date.now();q.completedAt=status==='achieved'?q.resultAt:null;save();render()}
 function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status='pending';q.done=false;q.resultAt=null;q.completedAt=null;save();render()}
-function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このクエストを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
+function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
 function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventMemo').value='';save();render()}function delEvent(id){D.events=D.events.filter(x=>x.id!==id);save();render()}
 function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);renderCal();renderTimeline()}function pick(k){selected=k;render()}
@@ -201,13 +209,25 @@ function periodStats(kind,base=new Date()){
  return {total:qs.length,achieved,missed,pending,judged,rate};
 }
 function rewardState(kind){
- let s=periodStats(kind),threshold=Number(kind==='week'?D.rewards.weekThreshold:D.rewards.monthThreshold)||80,reward=kind==='week'?D.rewards.weekReward:D.rewards.monthReward;
- let unlocked=s.total>0&&s.pending===0&&s.rate>=threshold;
- return {...s,threshold,reward,unlocked};
+ let s=periodStats(kind);
+ let threshold=Number(kind==='week'?D.rewards.weekThreshold:D.rewards.monthThreshold)||80;
+ let minCount=Number(kind==='week'?D.rewards.weekMinCount:D.rewards.monthMinCount)||(kind==='week'?5:20);
+ let reward=kind==='week'?D.rewards.weekReward:D.rewards.monthReward;
+ let countOk=s.judged>=minCount;
+ let rateOk=s.rate>=threshold;
+ let unlocked=countOk&&rateOk;
+ return {...s,threshold,minCount,reward,countOk,rateOk,unlocked};
 }
 function rewardMarkup(kind,label){
  let r=rewardState(kind),pct=Math.min(100,r.rate);
- return `<div class="reward compact ${r.unlocked?'unlocked':''}"><div class="row"><b>${label}</b><b>${r.rate}% / ${r.threshold}%</b></div><div class="progress"><div style="width:${pct}%"></div></div><div class="row"><span class="muted">✅${r.achieved}　❌${r.missed}　⏳${r.pending}</span><span class="muted">${r.unlocked?'🎉 解放':'あと'+Math.max(0,r.threshold-r.rate)+'%'}</span></div>${r.unlocked&&r.reward?`<div style="margin-top:5px"><b>🎁 ${r.reward}</b></div>`:''}</div>`;
+ return `<div class="reward compact ${r.unlocked?'unlocked':''}">
+<div class="row"><b>${label}</b><b>${r.rate}% / ${r.threshold}%</b></div>
+<div class="progress"><div style="width:${pct}%"></div></div>
+<div class="muted">✅${r.achieved}　❌${r.missed}　⏳${r.pending}</div>
+<div class="muted">判定済み ${r.judged} / ${r.minCount}件</div>
+<div style="margin-top:5px"><b>${r.unlocked?'🎉 ご褒美アンロック！':'🎁 '+(r.reward||'ご褒美未設定')}</b></div>
+${r.unlocked&&r.reward?`<div>${r.reward}</div>`:''}
+</div>`;
 }
 function toggleRewardSettings(){
  const box=$('rewardSettings'),open=!box.classList.contains('open');
@@ -262,14 +282,18 @@ function saveAppSettings(){
  let t=$('settingsTitle').value.trim();
  if(t)D.title=t;
  D.rewards.weekThreshold=Math.max(1,Math.min(100,Number($('settingsWeekThreshold').value)||80));
+ D.rewards.weekMinCount=Math.max(1,Math.min(99,Number($('settingsWeekMinCount').value)||5));
  D.rewards.monthThreshold=Math.max(1,Math.min(100,Number($('settingsMonthThreshold').value)||80));
+ D.rewards.monthMinCount=Math.max(1,Math.min(999,Number($('settingsMonthMinCount').value)||20));
  save();render();tab('home');
 }
 function restoreDataFromSettings(){
  let f=$('restoreSettings').files[0];
  if(!f)return alert('バックアップファイルを選んでください');
  let r=new FileReader();
- r.onload=()=>{try{D=JSON.parse(r.result);if(!D.rewards)D.rewards={weekThreshold:80,weekReward:'',monthThreshold:80,monthReward:''};save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
+ r.onload=()=>{try{D=JSON.parse(r.result);if(!D.rewards)D.rewards={weekThreshold:80,weekMinCount:5,weekReward:'',monthThreshold:80,monthMinCount:20,monthReward:''};
+if(D.rewards.weekMinCount===undefined)D.rewards.weekMinCount=5;
+if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
  r.readAsText(f);
 }
 function resetAllData(){
@@ -280,6 +304,16 @@ function resetAllData(){
 }
 
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let q=D.quests.find(x=>!x.status||x.status==='pending');$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'判定待ちクエストなし';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';$('qList').innerHTML=D.quests.length?D.quests.map(x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:`<button class="danger" onclick="delPendingQuest(${x.id})">🗑 削除</button>`}</div></div>`}).join(''):'なし';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline()}
+function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';{
+ let today=dk(new Date());
+ let itemHtml=x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:`<button class="danger" onclick="delPendingQuest(${x.id})">🗑 削除</button>`}</div></div>`};
+ let todayQs=D.quests.filter(x=>questPlanDate(x)===today);
+ let futureQs=D.quests.filter(x=>questPlanDate(x)>today);
+ let pastQs=D.quests.filter(x=>questPlanDate(x)<today);
+ $('qList').innerHTML=
+   `<div class="tl-date">今日</div>${todayQs.length?todayQs.map(itemHtml).join(''):'<div class="muted">今日のデイリーはありません。</div>'}`+
+   `<div class="tl-date">今後</div>${futureQs.length?futureQs.map(itemHtml).join(''):'<div class="muted">予定なし</div>'}`+
+   `<div class="tl-date">過去</div>${pastQs.length?pastQs.map(itemHtml).join(''):'<div class="muted">履歴なし</div>'}`;
+}$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline()}
 $('txDate').value=$('qDue').value=dk(new Date());['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
