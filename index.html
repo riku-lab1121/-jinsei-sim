@@ -17,6 +17,11 @@
 .filterRow{display:flex;gap:6px;overflow-x:auto;padding:8px 0}.filterBtn{white-space:nowrap;padding:8px 10px}.filterBtn.active{background:#66c68a;color:#fff}
 .template{background:#f6fbfd;border-radius:14px;padding:11px;margin-top:8px}
 .searchResult{padding:10px 0;border-bottom:1px solid #deebef}.searchResult:last-child{border:0}
+.dailySection{margin-top:14px}.dailyHeader{width:100%;display:flex;align-items:center;justify-content:space-between;background:#eef8fb;padding:10px 12px;border-radius:14px;font-size:17px}.dailyHeader .count{font-size:12px;color:#748895}
+.dailyBody{margin-top:6px}.dailyBody.collapsed{display:none}
+.dailyItem{padding:10px 0;border-bottom:1px solid #deebef}.dailyTop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.dailyTitle{font-size:17px;font-weight:900;line-height:1.25}.dailyMeta{font-size:12px;color:#8198a5;margin-top:2px}
+.dailyActions{display:none;gap:6px;flex-wrap:wrap;margin-top:8px}.dailyActions.open{display:flex}.dailyActions button{padding:8px 10px;font-size:13px}.judgeBtn{padding:7px 10px;font-size:12px;background:#edf8fc;white-space:nowrap}
+.statusMini{display:inline-block;padding:3px 7px;border-radius:99px;font-size:10px;font-weight:900;margin-top:4px}.statusMini.achieved{background:#dff7e8;color:#277d4b}.statusMini.missed{background:#ffe9e9;color:#a54a4a}.statusMini.pending{background:#edf3f6;color:#718590}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -414,17 +419,61 @@ function resetAllData(){
  location.reload();
 }
 
+
+function toggleDailyActions(id){
+ let el=document.getElementById('daily-actions-'+id);
+ if(el)el.classList.toggle('open');
+}
+function toggleDailySection(name){
+ let el=document.getElementById('daily-section-'+name);
+ if(el)el.classList.toggle('collapsed');
+ let icon=document.getElementById('daily-icon-'+name);
+ if(icon)icon.textContent=el.classList.contains('collapsed')?'＋':'−';
+}
+
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
 function render(){let n=summary();$('appTitle').textContent=D.title;$('titleInput').value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let q=D.quests.find(x=>(!x.status||x.status==='pending')&&questPlanDate(x)===todayKey);$('nextQuest').innerHTML=q?`<b>${q.title}</b><div>${q.due||'期限なし'}</div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${q.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${q.id},'missed')">❌ 未達成</button></div>`:'今日の未判定デイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';$('txList').innerHTML=D.tx.length?D.tx.slice(0,50).map(x=>`<div class="item"><div class="row"><div><b>${x.cat}</b><div class="muted">${x.date} ${x.memo||''}</div></div><b>${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}</b></div><button class="danger" style="margin-top:8px" onclick="delTx(${x.id})">🗑 削除</button></div>`).join(''):'<div class="muted">履歴なし</div>';$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
- let itemHtml=x=>{let st=x.status||'pending',label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';return `<div class="item"><div><b>${x.title}</b><div class="muted">${x.due||'期限なし'} ${x.memo||''}</div><span class="resultTag ${st}">${label}</span></div><div class="resultBtns"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:`<button class="danger" onclick="delPendingQuest(${x.id})">🗑 削除</button>`}</div></div>`};
+ let itemHtml=x=>{
+   let st=x.status||'pending';
+   let label=st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち';
+   return `<div class="dailyItem">
+     <div class="dailyTop">
+       <div>
+         <div class="dailyTitle">${x.title}</div>
+         <div class="dailyMeta">${x.due||'期限なし'}${x.memo?` ・ ${x.memo}`:''}</div>
+         <span class="statusMini ${st}">${label}</span>
+       </div>
+       <button class="judgeBtn" onclick="toggleDailyActions(${x.id})">判定</button>
+     </div>
+     <div id="daily-actions-${x.id}" class="dailyActions">
+       <button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button>
+       <button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>
+       ${st!=='pending'
+         ? `<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`
+         : `<button class="danger" onclick="delPendingQuest(${x.id})">🗑 削除</button>`}
+     </div>
+   </div>`;
+ };
  let todayQs=D.quests.filter(x=>questPlanDate(x)===today);
  let futureQs=D.quests.filter(x=>questPlanDate(x)>today);
  let pastQs=D.quests.filter(x=>questPlanDate(x)<today);
+
+ let section=(key,label,items,collapsed=false)=>`
+   <div class="dailySection">
+     <button class="dailyHeader" onclick="toggleDailySection('${key}')">
+       <span>${label} <span class="count">${items.length}件</span></span>
+       <span id="daily-icon-${key}">${collapsed?'＋':'−'}</span>
+     </button>
+     <div id="daily-section-${key}" class="dailyBody ${collapsed?'collapsed':''}">
+       ${items.length?items.map(itemHtml).join(''):'<div class="muted" style="padding:10px 4px">なし</div>'}
+     </div>
+   </div>`;
+
  $('qList').innerHTML=
-   `<div class="tl-date">今日</div>${todayQs.length?todayQs.map(itemHtml).join(''):'<div class="muted">今日のデイリーはありません。</div>'}`+
-   `<div class="tl-date">今後</div>${futureQs.length?futureQs.map(itemHtml).join(''):'<div class="muted">予定なし</div>'}`+
-   `<div class="tl-date">過去</div>${pastQs.length?pastQs.map(itemHtml).join(''):'<div class="muted">履歴なし</div>'}`;
+   section('today','今日',todayQs,false)+
+   section('future','今後',futureQs,true)+
+   section('past','過去',pastQs,true);
 }$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${t.repeat==='daily'?'毎日':t.repeat==='weekday'?'平日':'毎週'} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
