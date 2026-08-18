@@ -69,9 +69,8 @@
 </div>
 </div>
 <div class="card"><div class="row"><h2>🎁 ご褒美</h2><button onclick="tab('quests')">詳細</button></div><div id="rewardHome"></div></div><div class="card dayClose">
-<div class="row"><h2>🌙 1日の締め</h2><span class="muted" id="closeStatus">未確定</span></div>
+<div class="row"><h2>🌙 今日のまとめ</h2><span class="muted">自動更新</span></div>
 <div id="closePreview" class="closeSummary"></div>
-<button class="primary" style="width:100%;margin-top:10px" onclick="closeToday()">今日を締める</button>
 </div>
 <div class="card"><div class="row"><h2>📝 最近のメモ</h2><button onclick="tab('more')">メモ</button></div><div id="recentMemo" class="muted"></div></div></section>
 <section id="money" class="screen"><div class="card"><h2>💰 家計簿</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="bal"></div></div><div><div class="muted">今月収支</div><div class="big" id="net"></div></div></div></div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date"><button class="primary" style="width:100%" onclick="addTx()">保存</button></div><div class="card">
@@ -680,14 +679,8 @@ function todaySummary(){
  return {k,achieved,missed,pending,expense,income,mood:moodValue(k),events:D.events.filter(x=>x.date===k).length,memos:D.memos.filter(x=>{let ts=x.createdAt||x.id||0;return ts&&dk(new Date(ts))===k}).length};
 }
 function renderDayClose(){
- let s=todaySummary(),closed=D.dayClosures[s.k];
- $('closeStatus').textContent=closed?'確定済み':'未確定';
- $('closePreview').innerHTML=`<div><b>🎯 デイリー</b>　✅${s.achieved} / ❌${s.missed} / ⏳${s.pending}</div><div style="margin-top:5px"><b>💰 今日の収支</b>　${s.income-s.expense>=0?'+':''}¥${(s.income-s.expense).toLocaleString()}</div><div style="margin-top:5px"><b>☀️ 調子</b>　${s.mood||'未入力'}　　<b>📅記録</b> ${s.events}件</div>${closed?`<div class="muted" style="margin-top:6px">締め時刻：${new Date(closed.closedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}</div>`:''}`;
-}
-function closeToday(){
  let s=todaySummary();
- D.dayClosures[s.k]={closedAt:Date.now(),summary:s};
- save();render();
+ $('closePreview').innerHTML=`<div><b>🎯 デイリー</b>　✅${s.achieved} / ❌${s.missed} / ⏳${s.pending}</div><div style="margin-top:5px"><b>💰 今日の収支</b>　${s.income-s.expense>=0?'+':''}¥${(s.income-s.expense).toLocaleString()}</div><div style="margin-top:5px"><b>☀️ 調子</b>　${s.mood||'未入力'}　　<b>📅 記録</b> ${s.events}件</div>`;
 }
 
 function saveAppSettings(){
