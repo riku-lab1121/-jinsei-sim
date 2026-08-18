@@ -1,6 +1,6 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#8ed6ff"><link rel="manifest" href="manifest.webmanifest"><title>シムレポート</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:#29495d;background:linear-gradient(#8ed8ff,#e9fbff);padding-bottom:82px}main{max-width:520px;margin:auto;padding:16px 14px 40px}.hero,.card{background:#fffffff0;border-radius:28px;padding:18px;margin-bottom:14px}.hero{background:linear-gradient(135deg,#7fd1ff,#a8ead1);position:relative}.hero h1{margin:0 55px 10px 0;font-size:29px}.diamond{position:absolute;right:28px;top:30px;font-size:50px}.clock{font-weight:900;font-size:19px;background:#ffffffc9;display:inline-block;padding:10px 14px;border-radius:17px}h2{font-size:20px;margin:0 0 12px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.big{font-size:29px;font-weight:900}.muted{color:#8198a5;font-size:13px}button,input,select,textarea{font:inherit}input,select,textarea{width:100%;padding:11px;border:1px solid #cfe2e9;border-radius:13px;background:white;margin:5px 0}textarea{min-height:80px}button{border:0;border-radius:13px;padding:10px 12px;font-weight:800;background:#edf8fc;color:#31596e}.primary{background:#66c68a;color:white}.danger{background:#ffeaea;color:#a54d4d}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.item{padding:11px 0;border-bottom:1px solid #deebef}.mood{display:flex;gap:7px}.mood button{flex:1;font-size:24px;padding:11px 3px}.mood .sel{outline:3px solid #67c58b;background:#e9faef}.nav{position:fixed;bottom:0;left:0;right:0;background:#fffef5;display:flex;justify-content:center;z-index:10}.tab{background:none;padding:9px 11px 7px;color:#748895;font-size:10px}.tab b{font-size:21px;display:block}.tab.active{color:#2fa363}.screen{display:none}.screen.active{display:block}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.dow{text-align:center;font-size:11px;color:#8299a6}.day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f5fbfd;border-radius:11px;font-size:13px}.today{background:#dff6e7;font-weight:900}.selected{outline:2px solid #5eafd9}.has{box-shadow:inset 0 -4px #66c68a}.photo{width:100%;max-height:260px;object-fit:cover;border-radius:14px;margin-top:8px}.calc{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.calcout{font-size:25px;font-weight:900;text-align:right;padding:10px;background:#f5fbfd;border-radius:13px}.note{background:#f5fbfd;border-radius:14px;padding:11px;margin-top:8px}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:#29495d;background:linear-gradient(#8ed8ff,#e9fbff);padding-bottom:82px}main{max-width:520px;margin:auto;padding:16px 14px 40px}.hero,.card{background:#fffffff0;border-radius:28px;padding:18px;margin-bottom:14px}.hero{background:linear-gradient(135deg,#7fd1ff,#a8ead1);position:relative}.hero h1{margin:0 55px 10px 0;font-size:29px}.diamond{position:absolute;right:28px;top:30px;font-size:50px}.clock{font-weight:900;font-size:19px;background:#ffffffc9;display:inline-block;padding:10px 14px;border-radius:17px}h2{font-size:20px;margin:0 0 12px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.big{font-size:29px;font-weight:900}.muted{color:#8198a5;font-size:13px}button,input,select,textarea{font:inherit}input,select,textarea{width:100%;padding:11px;border:1px solid #cfe2e9;border-radius:13px;background:white;margin:5px 0}textarea{min-height:80px}button{border:0;border-radius:13px;padding:10px 12px;font-weight:800;background:#edf8fc;color:#31596e;transition:transform .08s ease,filter .08s ease,opacity .08s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}button:active{transform:scale(.96);filter:brightness(.88)}.primary{background:#66c68a;color:white}.danger{background:#ffeaea;color:#a54d4d}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.item{padding:11px 0;border-bottom:1px solid #deebef}.mood{display:flex;gap:7px}.mood button{flex:1;font-size:24px;padding:11px 3px}.mood .sel{outline:3px solid #67c58b;background:#e9faef}.nav{position:fixed;bottom:0;left:0;right:0;background:#fffef5;display:flex;justify-content:center;z-index:10}.tab{background:none;padding:9px 11px 7px;color:#748895;font-size:10px}.tab b{font-size:21px;display:block}.tab.active{color:#2fa363}.screen{display:none}.screen.active{display:block}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.dow{text-align:center;font-size:11px;color:#8299a6}.day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#f5fbfd;border-radius:11px;font-size:13px}.today{background:#dff6e7;font-weight:900}.selected{outline:2px solid #5eafd9}.has{box-shadow:inset 0 -4px #66c68a}.photo{width:100%;max-height:260px;object-fit:cover;border-radius:14px;margin-top:8px}.calc{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.calcout{font-size:25px;font-weight:900;text-align:right;padding:10px;background:#f5fbfd;border-radius:13px}.note{background:#f5fbfd;border-radius:14px;padding:11px;margin-top:8px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#edf7fa;padding:4px;border-radius:14px;margin-bottom:12px}.seg button.active{background:white;box-shadow:0 2px 8px #56788a18}
 .tl-date{font-size:17px;font-weight:900;margin:16px 0 6px}.tl{position:relative;padding-left:24px}.tl:before{content:"";position:absolute;left:8px;top:5px;bottom:5px;width:2px;background:#d5e8ee}.tl-item{position:relative;background:#f7fbfd;border-radius:15px;padding:11px 12px;margin:8px 0}.tl-item:before{content:"";position:absolute;left:-20px;top:16px;width:10px;height:10px;border-radius:50%;background:#67c58b;border:2px solid white}.tl-time{font-size:11px;color:#8299a6}.summarybox{background:#f5fbfd;border-radius:16px;padding:12px}.summarynum{font-size:22px;font-weight:900}
 .reward{background:linear-gradient(135deg,#fff8d6,#fffdf1);border:1px solid #f2df8c;border-radius:18px;padding:13px;margin-top:10px}
@@ -40,6 +40,10 @@
 .weekdayChip input:checked+span{background:#dff7e8;border-color:#63c58b;color:#277d4b}
 .weekdayChip.sun span{color:#bd5d5d}.weekdayChip.sat span{color:#5b6fc2}
 .weekdayChip.sun input:checked+span,.weekdayChip.sat input:checked+span{color:#277d4b}
+.themePresets{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+.themePreset{height:42px;padding:0;border:3px solid #fff;box-shadow:0 0 0 1px #cfe2e9}
+.themePreset.selected{box-shadow:0 0 0 3px #4d9fc8}
+.themeColorRow{display:flex;align-items:center;gap:10px}.themeColorRow input[type=color]{width:72px;height:46px;padding:4px;margin:0}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -214,6 +218,21 @@
     <input id="settingsTitle" placeholder="シムレポート">
   </div>
   <div class="section">
+    <h2 style="font-size:17px">🎨 テーマ</h2>
+    <div class="muted">背景カラーはこの端末だけに保存されます。共有相手には影響しません。</div>
+    <div class="themePresets">
+      <button class="themePreset" data-theme="#8ed8ff" style="background:#8ed8ff" onclick="setThemeColor('#8ed8ff')" aria-label="ブルー"></button>
+      <button class="themePreset" data-theme="#9ee6c3" style="background:#9ee6c3" onclick="setThemeColor('#9ee6c3')" aria-label="ミント"></button>
+      <button class="themePreset" data-theme="#ffc6a8" style="background:#ffc6a8" onclick="setThemeColor('#ffc6a8')" aria-label="ピーチ"></button>
+      <button class="themePreset" data-theme="#cbbcff" style="background:#cbbcff" onclick="setThemeColor('#cbbcff')" aria-label="ラベンダー"></button>
+      <button class="themePreset" data-theme="#c7d3dc" style="background:#c7d3dc" onclick="setThemeColor('#c7d3dc')" aria-label="グレー"></button>
+    </div>
+    <div class="themeColorRow">
+      <input id="themeColor" type="color" value="#8ed8ff" oninput="setThemeColor(this.value)">
+      <div><b>好きな色を選ぶ</b><div class="muted">変更するとすぐ反映・保存されます</div></div>
+    </div>
+  </div>
+  <div class="section">
   <h2 style="font-size:17px">💰 月予算</h2>
   <div class="muted">カテゴリごとの1か月の予算</div>
   <div class="grid2">
@@ -268,12 +287,45 @@ if(!D.recurringTx)D.recurringTx=[];
 if(!D.dailyTemplates)D.dailyTemplates=[];
 if(!D.budgets)D.budgets={食費:0,交通:0,固定費:0,車:0,趣味:0,日用品:0,その他:0};
 if(!D.dayClosures)D.dayClosures={};
+if(typeof D.themeColor!=='string')D.themeColor='#8ed8ff';
 if(typeof D.player!=='string')D.player='';
 if(D.title==='人生シム 大陸編')D.title='シムレポート';
 if(typeof D.setupDone!=='boolean')D.setupDone=false;
 (D.quests||[]).forEach(q=>{if(!q.status)q.status=q.done?'achieved':'pending';if(!q.resultAt&&q.completedAt)q.resultAt=q.completedAt});
 let selected=dk(new Date()),view=new Date(),expr='';
 function $(x){return document.getElementById(x)}function save(){localStorage.setItem(K,JSON.stringify(D))}function dk(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+
+function hexToRgb(hex){
+ let h=(hex||'#8ed8ff').replace('#','');
+ if(h.length===3)h=h.split('').map(x=>x+x).join('');
+ let n=parseInt(h,16);
+ return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+function mixWithWhite(hex,amount=.78){
+ let c=hexToRgb(hex),m=v=>Math.round(v+(255-v)*amount);
+ return `rgb(${m(c.r)},${m(c.g)},${m(c.b)})`;
+}
+function applyTheme(){
+ let c=D.themeColor||'#8ed8ff';
+ document.body.style.background=`linear-gradient(${c},${mixWithWhite(c)})`;
+ let picker=$('themeColor');if(picker)picker.value=c;
+ document.querySelectorAll('.themePreset').forEach(b=>b.classList.toggle('selected',b.dataset.theme.toLowerCase()===c.toLowerCase()));
+}
+function setThemeColor(c){
+ D.themeColor=c||'#8ed8ff';
+ save();
+ applyTheme();
+}
+function lightHaptic(){
+ try{
+   if(navigator.vibrate)navigator.vibrate(8);
+ }catch(e){}
+}
+document.addEventListener('pointerdown',e=>{
+ let b=e.target.closest&&e.target.closest('button');
+ if(b&&!b.disabled)lightHaptic();
+},{passive:true});
+
 function tick(){let n=new Date(),w='日月火水木金土'[n.getDay()];$('clock').textContent=`${n.getMonth()+1}月${n.getDate()}日（${w}） ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}
 function tab(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.id===id));render()}
 function summary(){let n=new Date(),p=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'),v=0;D.tx.filter(x=>x.date.startsWith(p)).forEach(x=>v+=x.type==='income'?x.amount:-x.amount);return v}
@@ -659,7 +711,8 @@ if(D.rewards.monthMinCount===undefined)D.rewards.monthMinCount=20;
 if(!D.recurringTx)D.recurringTx=[];
 if(!D.dailyTemplates)D.dailyTemplates=[];
 if(!D.budgets)D.budgets={食費:0,交通:0,固定費:0,車:0,趣味:0,日用品:0,その他:0};
-if(!D.dayClosures)D.dayClosures={};save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
+if(!D.dayClosures)D.dayClosures={};
+if(typeof D.themeColor!=='string')D.themeColor='#8ed8ff';save();render();alert('復元しました')}catch(e){alert('バックアップを読み込めませんでした')}};
  r.readAsText(f);
 }
 function resetAllData(){
@@ -691,7 +744,7 @@ function toggleHomeDaily(){
 }
 
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){let n=summary();$('appTitle').textContent=D.title;let st=$('settingsTitle');if(st)st.value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let todayHomeQs=D.quests.filter(x=>questPlanDate(x)===todayKey);$('nextQuest').innerHTML=todayHomeQs.length?todayHomeQs.map(x=>{let st=x.status||'pending';return `<div class="dailyItem"><div class="dailyTop"><div><div class="dailyTitle">${x.title}</div>${x.memo?`<div class="dailyMeta">${x.memo}</div>`:''}<span class="statusMini ${st}">${st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち'}</span></div></div><div class="dailyActions open"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'今日のデイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
+function render(){applyTheme();let n=summary();$('appTitle').textContent=D.title;let st=$('settingsTitle');if(st)st.value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let todayHomeQs=D.quests.filter(x=>questPlanDate(x)===todayKey);$('nextQuest').innerHTML=todayHomeQs.length?todayHomeQs.map(x=>{let st=x.status||'pending';return `<div class="dailyItem"><div class="dailyTop"><div><div class="dailyTitle">${x.title}</div>${x.memo?`<div class="dailyMeta">${x.memo}</div>`:''}<span class="statusMini ${st}">${st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち'}</span></div></div><div class="dailyActions open"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'今日のデイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
  let itemHtml=x=>{
    let st=x.status||'pending';
@@ -734,5 +787,5 @@ function render(){let n=summary();$('appTitle').textContent=D.title;let st=$('se
    section('future','今後（単発）',futureQs,true)+
    section('past','過去',pastQs,true);
 }$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
-$('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
+$('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});applyTheme();tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
