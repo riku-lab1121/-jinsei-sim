@@ -47,6 +47,7 @@
 .homeWeekEvent{display:grid;grid-template-columns:112px 1fr;gap:10px;padding:9px 2px;border-bottom:1px solid #dbe8ed;align-items:start}.homeWeekEvent:last-child{border-bottom:0}.homeWeekDate{font-weight:900;color:#557487;white-space:nowrap}.homeWeekTitle{font-weight:800;color:#294e62;overflow-wrap:anywhere}
 .homeMoneyBig{font-size:28px}.homeBudgetTrack{height:12px;border-radius:999px;background:#e7f0f3;overflow:hidden}.homeBudgetFill{height:100%;border-radius:999px;background:#63c58b}.homeBudgetFill.over{background:#dc7777}.homeBudgetMetaRow{display:flex;justify-content:space-between;gap:12px;font-weight:700}
 .moneyTopBig{font-size:28px;line-height:1.15}.moneyTopNote{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700}
+.selectedPlansHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 2px 8px}.calendarEventCard{padding:12px 0;border-bottom:1px solid #dce8ed}.calendarEventCard:last-child{border-bottom:0}.calendarEventTitle{font-size:17px;font-weight:900}.calendarEventMemo{font-size:13px;color:#718995;margin-top:5px;white-space:pre-wrap}.eventManageBtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.eventManageBtns button{padding:8px 10px;font-size:12px}.eventMemoEditor{display:none;margin-top:9px}.eventMemoEditor.open{display:block}.eventMemoEditor textarea{min-height:80px;margin:0 0 7px}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -138,6 +139,7 @@
       <input id="photoInput" type="file" accept="image/*">
       <input id="photoCaption" placeholder="写真のひとこと">
       <button style="width:100%" onclick="addPhoto()">📷 写真を追加</button>
+      <div class="selectedPlansHead"><b>📋 この日の予定</b><span class="muted">確認・メモ・削除</span></div>
       <div id="dayLog"></div>
     </div>
 
@@ -488,7 +490,16 @@ function setQuestResult(id,status){let q=D.quests.find(x=>x.id===id);if(!q)retur
 function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status='pending';q.done=false;q.resultAt=null;q.completedAt=null;save();render()}
 function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
-function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventMemo').value='';save();render()}function delEvent(id){D.events=D.events.filter(x=>x.id!==id);save();render()}
+function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventTime').value='';$('eventMemo').value='';save();render()}
+function delEvent(id){if(!confirm('この予定を削除しますか？'))return;D.events=D.events.filter(x=>x.id!==id);save();render()}
+function toggleEventMemo(id){
+ let el=$('eventMemoEditor-'+id);if(el)el.classList.toggle('open');
+}
+function saveEventMemo(id){
+ let e=D.events.find(x=>x.id===id);if(!e)return;
+ let input=$('eventMemoInput-'+id);if(!input)return;
+ e.memo=input.value.trim();save();render();
+}
 function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);timelineMonthDate=new Date(view.getFullYear(),view.getMonth(),1);renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}function pick(k){selected=k;timelineDate=new Date(k+'T12:00:00');timelineMonthDate=new Date(timelineDate.getFullYear(),timelineDate.getMonth(),1);render();}
 async function addPhoto(){let f=$('photoInput').files[0];if(!f)return alert('写真を選んでください');let data=await resize(f);D.events.push({id:Date.now(),kind:'photo',date:selected,title:$('photoCaption').value||'写真',data,createdAt:Date.now()});try{save()}catch(e){D.events.pop();return alert('保存容量がいっぱいです')} $('photoInput').value='';$('photoCaption').value='';render()}
 function resize(f){return new Promise(r=>{let fr=new FileReader();fr.onload=()=>{let im=new Image();im.onload=()=>{let s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.65))};im.src=fr.result};fr.readAsDataURL(f)})}
@@ -828,6 +839,19 @@ function render(){applyTheme();renderHomeWeekEvents();renderHomeMoney();renderMo
    section('today','今日',todayQs,false)+
    section('future','今後（単発）',futureQs,true)+
    section('past','過去',pastQs,true);
-}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'?`<div class="item"><b>📷 ${x.title}</b><img class="photo" src="${x.data}"><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`:`<div class="item row"><div><b>📅 ${x.time||''} ${x.title}</b><div class="muted">${x.memo||''}</div></div><button class="danger" onclick="delEvent(${x.id})">削除</button></div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
+}$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'
+ ? `<div class="calendarEventCard"><div class="calendarEventTitle">📷 ${x.title}</div><img class="photo" src="${x.data}"><div class="eventManageBtns"><button class="danger" onclick="delEvent(${x.id})">🗑 削除</button></div></div>`
+ : `<div class="calendarEventCard">
+      <div class="calendarEventTitle">📅 ${x.time?x.time+' ':''}${x.title}</div>
+      <div class="calendarEventMemo">${x.memo?x.memo:'メモなし'}</div>
+      <div class="eventManageBtns">
+        <button onclick="toggleEventMemo(${x.id})">📝 ${x.memo?'メモ編集':'メモ追加'}</button>
+        <button class="danger" onclick="delEvent(${x.id})">🗑 削除</button>
+      </div>
+      <div id="eventMemoEditor-${x.id}" class="eventMemoEditor">
+        <textarea id="eventMemoInput-${x.id}" placeholder="予定のメモ">${x.memo||''}</textarea>
+        <button class="primary" style="width:100%" onclick="saveEventMemo(${x.id})">メモを保存</button>
+      </div>
+    </div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});applyTheme();tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
 </script></body></html>
