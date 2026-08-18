@@ -48,6 +48,9 @@
 .homeMoneyBig{font-size:28px}.homeBudgetTrack{height:12px;border-radius:999px;background:#e7f0f3;overflow:hidden}.homeBudgetFill{height:100%;border-radius:999px;background:#63c58b}.homeBudgetFill.over{background:#dc7777}.homeBudgetMetaRow{display:flex;justify-content:space-between;gap:12px;font-weight:700}
 .moneyTopBig{font-size:28px;line-height:1.15}.moneyTopNote{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700}
 .selectedPlansHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 2px 8px}.calendarEventCard{padding:12px 0;border-bottom:1px solid #dce8ed}.calendarEventCard:last-child{border-bottom:0}.calendarEventTitle{font-size:17px;font-weight:900}.calendarEventMemo{font-size:13px;color:#718995;margin-top:5px;white-space:pre-wrap}.eventManageBtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.eventManageBtns button{padding:8px 10px;font-size:12px}.eventMemoEditor{display:none;margin-top:9px}.eventMemoEditor.open{display:block}.eventMemoEditor textarea{min-height:80px;margin:0 0 7px}
+.calLegend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:#718995}.calLegend span{display:flex;align-items:center;gap:5px}.calDot{display:inline-block;width:8px;height:8px;border-radius:50%}.calDot.event{background:#63c58b}.calDot.money{background:#e2a54b}.calDot.photoDot{background:#6daed4}
+.day{position:relative;overflow:visible;flex-direction:column;gap:4px}.dayDots{height:7px;display:flex;justify-content:center;gap:3px;position:absolute;bottom:5px;left:0;right:0}.dayDot{width:5px;height:5px;border-radius:50%}.dayDot.event{background:#63c58b}.dayDot.money{background:#e2a54b}.dayDot.photoDot{background:#6daed4}.has{box-shadow:none}
+.calendarEventCard.past{opacity:.5}.eventEditPanel{display:none;margin-top:10px;padding:10px;background:#f6fbfd;border-radius:14px}.eventEditPanel.open{display:block}.eventEditPanel input,.eventEditPanel textarea{margin:0 0 8px}.eventEditPanel textarea{min-height:86px}.eventPastLabel{font-size:11px;color:#8a9ca6;margin-top:4px}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -120,6 +123,11 @@
   <div class="card">
     <div class="row"><button onclick="month(-1)">←</button><h2 id="calTitle"></h2><button onclick="month(1)">→</button></div>
     <div class="calendar" id="cal"></div>
+    <div class="calLegend">
+      <span><i class="calDot event"></i>予定</span>
+      <span><i class="calDot money"></i>家計簿</span>
+      <span><i class="calDot photoDot"></i>写真</span>
+    </div>
   </div>
 
   <div class="card">
@@ -139,7 +147,7 @@
       <input id="photoInput" type="file" accept="image/*">
       <input id="photoCaption" placeholder="写真のひとこと">
       <button style="width:100%" onclick="addPhoto()">📷 写真を追加</button>
-      <div class="selectedPlansHead"><b>📋 この日の予定</b><span class="muted">確認・メモ・削除</span></div>
+      <div class="selectedPlansHead"><b>📋 この日の予定</b><span class="muted">確認・編集・削除</span></div>
       <div id="dayLog"></div>
     </div>
 
@@ -147,7 +155,6 @@
       <div class="filterRow" id="timelineFilters">
         <button class="filterBtn active" onclick="setTimelineFilter('all',this)">全部</button>
         <button class="filterBtn" onclick="setTimelineFilter('tx',this)">💰家計簿</button>
-        <button class="filterBtn" onclick="setTimelineFilter('quest',this)">🎯デイリー</button>
         <button class="filterBtn" onclick="setTimelineFilter('event',this)">📅予定</button>
         <button class="filterBtn" onclick="setTimelineFilter('photo',this)">📷写真</button>
         <button class="filterBtn" onclick="setTimelineFilter('memo',this)">📝メモ</button>
@@ -161,7 +168,7 @@
       <div class="grid2">
         <div class="summarybox"><div class="muted">収支</div><div class="summarynum" id="tmNet"></div></div>
         <div class="summarybox"><div class="muted">支出</div><div class="summarynum" id="tmExpense"></div></div>
-        <div class="summarybox"><div class="muted">デイリー結果</div><div class="summarynum" id="tmQuest"></div></div>
+        <div class="summarybox"><div class="muted">予定</div><div class="summarynum" id="tmEvents"></div></div>
         <div class="summarybox"><div class="muted">写真 / メモ</div><div class="summarynum" id="tmLogs"></div></div>
       </div>
       <div id="monthTimeline"></div>
@@ -170,7 +177,7 @@
 
   <div class="card">
     <div class="row"><h2>🔎 記録を検索</h2><button onclick="clearSearch()">クリア</button></div>
-    <input id="searchInput" placeholder="家計簿・予定・デイリー・メモを検索" oninput="renderSearch()">
+    <input id="searchInput" placeholder="家計簿・予定・写真・メモを検索" oninput="renderSearch()">
     <div id="searchResults"></div>
   </div>
 
@@ -490,15 +497,35 @@ function setQuestResult(id,status){let q=D.quests.find(x=>x.id===id);if(!q)retur
 function resetQuestResult(id){let q=D.quests.find(x=>x.id===id);if(!q)return;q.status='pending';q.done=false;q.resultAt=null;q.completedAt=null;save();render()}
 function delPendingQuest(id){let q=D.quests.find(x=>x.id===id);if(!q)return;let st=q.status||'pending';if(st!=='pending')return alert('判定済みのクエストは、先に「判定待ち」に戻してください。');if(!confirm('このデイリーを削除しますか？'))return;D.quests=D.quests.filter(x=>x.id!==id);save();render()}
 function addMemo(){if(!$('memo').value.trim())return;D.memos.unshift({id:Date.now(),text:$('memo').value.trim(),date:new Date().toLocaleString('ja-JP'),createdAt:Date.now()});$('memo').value='';save();render()}function delMemo(id){D.memos=D.memos.filter(x=>x.id!==id);save();render()}
-function addEvent(){if(!$('eventTitle').value.trim())return;D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});$('eventTitle').value='';$('eventTime').value='';$('eventMemo').value='';save();render()}
-function delEvent(id){if(!confirm('この予定を削除しますか？'))return;D.events=D.events.filter(x=>x.id!==id);save();render()}
-function toggleEventMemo(id){
- let el=$('eventMemoEditor-'+id);if(el)el.classList.toggle('open');
+function addEvent(){
+ if(!$('eventTitle').value.trim())return;
+ D.events.push({id:Date.now(),kind:'event',date:selected,title:$('eventTitle').value.trim(),time:$('eventTime').value,memo:$('eventMemo').value,createdAt:Date.now()});
+ $('eventTitle').value='';$('eventTime').value='';$('eventMemo').value='';save();render();
 }
-function saveEventMemo(id){
- let e=D.events.find(x=>x.id===id);if(!e)return;
- let input=$('eventMemoInput-'+id);if(!input)return;
- e.memo=input.value.trim();save();render();
+function delEvent(id){
+ if(!confirm('この予定を削除しますか？'))return;
+ D.events=D.events.filter(x=>x.id!==id);save();render();
+}
+function isEventPast(e){
+ let today=dk(new Date());
+ if(e.date<today)return true;
+ if(e.date>today)return false;
+ if(!e.time)return false;
+ let n=new Date(),nowTime=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+ return e.time<nowTime;
+}
+function toggleEventEdit(id){
+ let el=$('eventEditPanel-'+id);if(el)el.classList.toggle('open');
+}
+function saveEventEdit(id){
+ let e=D.events.find(x=>x.id===id&&x.kind==='event');if(!e)return;
+ let title=$('eventEditTitle-'+id)?.value.trim();
+ if(!title)return alert('予定名を入力してください');
+ e.title=title;
+ e.date=$('eventEditDate-'+id)?.value||e.date;
+ e.time=$('eventEditTime-'+id)?.value||'';
+ e.memo=$('eventEditMemo-'+id)?.value.trim()||'';
+ save();render();
 }
 function month(v){view=new Date(view.getFullYear(),view.getMonth()+v,1);timelineMonthDate=new Date(view.getFullYear(),view.getMonth(),1);renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}function pick(k){selected=k;timelineDate=new Date(k+'T12:00:00');timelineMonthDate=new Date(timelineDate.getFullYear(),timelineDate.getMonth(),1);render();}
 async function addPhoto(){let f=$('photoInput').files[0];if(!f)return alert('写真を選んでください');let data=await resize(f);D.events.push({id:Date.now(),kind:'photo',date:selected,title:$('photoCaption').value||'写真',data,createdAt:Date.now()});try{save()}catch(e){D.events.pop();return alert('保存容量がいっぱいです')} $('photoInput').value='';$('photoCaption').value='';render()}
@@ -519,7 +546,6 @@ function renderSearch(){
  let q=($('searchInput')?.value||'').trim().toLowerCase(),out=[];
  if(!q){$('searchResults').innerHTML='<div class="muted">文字を入力すると全体検索できます。</div>';return}
  D.tx.forEach(x=>{let s=`${x.cat} ${x.memo||''} ${x.amount} ${x.date}`.toLowerCase();if(s.includes(q))out.push({icon:'💰',title:`${x.cat} ${x.type==='income'?'+':'-'}¥${x.amount.toLocaleString()}`,sub:`${x.date} ${x.memo||''}`})});
- D.quests.forEach(x=>{let s=`${x.title} ${x.memo||''} ${x.due||''}`.toLowerCase();if(s.includes(q))out.push({icon:'🎯',title:x.title,sub:`${x.due||''} ${x.status==='achieved'?'達成':x.status==='missed'?'未達成':'判定待ち'}`})});
  D.events.forEach(x=>{let s=`${x.title||''} ${x.memo||''} ${x.date||''}`.toLowerCase();if(s.includes(q))out.push({icon:x.kind==='photo'?'📷':'📅',title:x.title||'写真',sub:x.date||''})});
  D.memos.forEach(x=>{let s=`${x.text} ${x.date}`.toLowerCase();if(s.includes(q))out.push({icon:'📝',title:x.text,sub:x.date})});
  $('searchResults').innerHTML=out.length?out.slice(0,40).map(x=>`<div class="searchResult"><b>${x.icon} ${x.title}</b><div class="muted">${x.sub}</div></div>`).join(''):'<div class="muted">見つかりませんでした。</div>';
@@ -550,7 +576,6 @@ function timelineItemsForDate(k){
    else a.push({sort:x.time?eventTimeToMinutes(x.time)*60000:(x.createdAt||x.id||0),time:x.time||timeOf(x.createdAt||x.id),kind:'event',icon:'📅',text:x.title,sub:x.memo||''});
  });
  D.memos.forEach(x=>{let ts=x.createdAt||x.id||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),kind:'memo',icon:'📝',text:x.text})});
- D.quests.filter(x=>x.status==='achieved'||x.status==='missed').forEach(x=>{let ts=x.resultAt||x.completedAt||0;if(ts&&dk(new Date(ts))===k)a.push({sort:ts,time:timeOf(ts),kind:'quest',icon:x.status==='achieved'?'✅':'❌',text:`${x.title} — ${x.status==='achieved'?'達成':'未達成'}`,sub:x.memo||''})});
  let mv=moodValue(k),mr=D.mood[k]; if(mv)a.push({sort:(mr&&mr.createdAt)||0,time:timeOf((mr&&mr.createdAt)||0),kind:'mood',icon:'☀️',text:'今日の調子：'+mv});
  if(timelineFilter!=='all')a=a.filter(x=>x.kind===timelineFilter);return a.sort((x,y)=>y.sort-x.sort);
 }
@@ -563,11 +588,10 @@ function renderTimeline(){
  let y=timelineMonthDate.getFullYear(),m=timelineMonthDate.getMonth(),prefix=`${y}-${String(m+1).padStart(2,'0')}`;
  $('timelineMonthTitle').textContent=`${y}年${m+1}月`;
  let tx=D.tx.filter(x=>x.date.startsWith(prefix)),inc=0,exp=0;tx.forEach(x=>x.type==='income'?inc+=x.amount:exp+=x.amount);
- let monthResolved=D.quests.filter(x=>(x.status==='achieved'||x.status==='missed')&&(x.resultAt||x.completedAt)&&dk(new Date(x.resultAt||x.completedAt)).startsWith(prefix));
- let completed=monthResolved.filter(x=>x.status==='achieved').length,missed=monthResolved.filter(x=>x.status==='missed').length;
+ let eventCount=D.events.filter(x=>x.kind==='event'&&x.date.startsWith(prefix)).length;
  let photos=D.events.filter(x=>x.kind==='photo'&&x.date.startsWith(prefix)).length;
  let memos=D.memos.filter(x=>{let ts=x.createdAt||x.id||0;return ts&&dk(new Date(ts)).startsWith(prefix)}).length;
- $('tmNet').textContent=(inc-exp>=0?'+':'')+'¥'+(inc-exp).toLocaleString();$('tmExpense').textContent='¥'+exp.toLocaleString();$('tmQuest').textContent=`${completed}達成 / ${missed}未達成`;$('tmLogs').textContent=`${photos} / ${memos}`;
+ $('tmNet').textContent=(inc-exp>=0?'+':'')+'¥'+(inc-exp).toLocaleString();$('tmExpense').textContent='¥'+exp.toLocaleString();$('tmEvents').textContent=eventCount+'件';$('tmLogs').textContent=`${photos} / ${memos}`;
  let daysIn=new Date(y,m+1,0).getDate(),blocks=[];
  for(let day=daysIn;day>=1;day--){let kd=`${prefix}-${String(day).padStart(2,'0')}`,it=timelineItemsForDate(kd);if(it.length)blocks.push(`<div class="tl-date">${m+1}月${day}日</div><div class="tl">${it.slice(0,8).map(x=>`<div class="tl-item"><div class="tl-time">${x.time||'記録'}</div><b>${x.icon} ${x.text}</b>${x.photo?`<img class="miniPhoto" src="${x.photo}">`:''}</div>`).join('')}</div>`)};
  $('monthTimeline').innerHTML=blocks.join('')||'<div class="muted" style="padding:18px 0">この月の記録はまだありません。</div>';
@@ -759,7 +783,21 @@ function toggleHomeDaily(){
  btn.textContent=opening?'閉じる':'開く';
 }
 
-function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
+function renderCal(){
+ let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+ $('calTitle').textContent=`${y}年${m+1}月`;
+ let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');
+ for(let i=0;i<f;i++)h+='<div></div>';
+ for(let i=1;i<=days;i++){
+   let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+   let hasEvent=D.events.some(x=>x.kind==='event'&&x.date===k);
+   let hasPhoto=D.events.some(x=>x.kind==='photo'&&x.date===k);
+   let hasMoney=D.tx.some(x=>x.date===k);
+   let dots=`<div class="dayDots">${hasEvent?'<i class="dayDot event"></i>':''}${hasMoney?'<i class="dayDot money"></i>':''}${hasPhoto?'<i class="dayDot photoDot"></i>':''}</div>`;
+   h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''}" onclick="pick('${k}')"><span>${i}</span>${dots}</div>`;
+ }
+ $('cal').innerHTML=h;
+}
 
 
 
@@ -841,16 +879,20 @@ function render(){applyTheme();renderHomeWeekEvents();renderHomeMoney();renderMo
    section('past','過去',pastQs,true);
 }$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'
  ? `<div class="calendarEventCard"><div class="calendarEventTitle">📷 ${x.title}</div><img class="photo" src="${x.data}"><div class="eventManageBtns"><button class="danger" onclick="delEvent(${x.id})">🗑 削除</button></div></div>`
- : `<div class="calendarEventCard">
+ : `<div class="calendarEventCard ${isEventPast(x)?'past':''}">
       <div class="calendarEventTitle">📅 ${x.time?x.time+' ':''}${x.title}</div>
       <div class="calendarEventMemo">${x.memo?x.memo:'メモなし'}</div>
+      ${isEventPast(x)?'<div class="eventPastLabel">終了した予定</div>':''}
       <div class="eventManageBtns">
-        <button onclick="toggleEventMemo(${x.id})">📝 ${x.memo?'メモ編集':'メモ追加'}</button>
+        <button onclick="toggleEventEdit(${x.id})">✏️ 編集</button>
         <button class="danger" onclick="delEvent(${x.id})">🗑 削除</button>
       </div>
-      <div id="eventMemoEditor-${x.id}" class="eventMemoEditor">
-        <textarea id="eventMemoInput-${x.id}" placeholder="予定のメモ">${x.memo||''}</textarea>
-        <button class="primary" style="width:100%" onclick="saveEventMemo(${x.id})">メモを保存</button>
+      <div id="eventEditPanel-${x.id}" class="eventEditPanel">
+        <input id="eventEditTitle-${x.id}" value="${x.title}" placeholder="予定名">
+        <input id="eventEditDate-${x.id}" type="date" value="${x.date}">
+        <input id="eventEditTime-${x.id}" type="time" value="${x.time||''}">
+        <textarea id="eventEditMemo-${x.id}" placeholder="予定のメモ">${x.memo||''}</textarea>
+        <button class="primary" style="width:100%" onclick="saveEventEdit(${x.id})">変更を保存</button>
       </div>
     </div>`).join('')||'<div class="muted">この日の予定・写真はありません。</div>';renderCal();renderTimeline();renderSearch();renderBudgetSummary();renderExpenseChart();renderDayClose()}
 $('txDate').value=$('qDue').value=dk(new Date());$('rtxStart').value=dk(new Date()).slice(0,7);['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+','C','⌫'].forEach(v=>{let b=document.createElement('button');b.textContent=v;b.onclick=()=>cp(v);$('calc').appendChild(b)});applyTheme();tick();setInterval(tick,1000);ensureRecurringTx();ensureDailyQuests();render();checkFirstRun();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js');
