@@ -44,6 +44,7 @@
 .themePreset{height:42px;padding:0;border:3px solid #fff;box-shadow:0 0 0 1px #cfe2e9}
 .themePreset.selected{box-shadow:0 0 0 3px #4d9fc8}
 .themeColorRow{display:flex;align-items:center;gap:10px}.themeColorRow input[type=color]{width:72px;height:46px;padding:4px;margin:0}
+.homeWeekEvent{display:grid;grid-template-columns:112px 1fr;gap:10px;padding:9px 2px;border-bottom:1px solid #dbe8ed;align-items:start}.homeWeekEvent:last-child{border-bottom:0}.homeWeekDate{font-weight:900;color:#557487;white-space:nowrap}.homeWeekTitle{font-weight:800;color:#294e62;overflow-wrap:anywhere}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -61,7 +62,12 @@
  </div>
 </div><main>
 <div class="hero"><div class="diamond">◆</div><h1 id="appTitle"></h1><div class="clock" id="clock"></div><div class="muted" style="margin-top:10px">毎日の生活を、少しだけゲームっぽく記録する。</div></div>
-<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div><div class="card">
+<section id="home" class="screen active"><div class="card"><h2>☀️ 今日の調子</h2><div class="mood" id="moods"></div><div id="moodText" class="muted"></div></div><div class="card"><h2>💰 今月</h2><div class="grid2"><div><div class="muted">残高</div><div class="big" id="homeBal"></div></div><div><div class="muted">今月収支</div><div class="big" id="homeNet"></div></div></div></div>
+<div class="card">
+<div class="row"><h2>📅 1週間の予定</h2><button onclick="tab('calendar')">カレンダー</button></div>
+<div id="homeWeekEvents"></div>
+</div>
+<div class="card">
 <div class="row"><h2>🎯 デイリークエスト</h2><button id="homeDailyToggle" onclick="toggleHomeDaily()">開く</button></div>
 <div id="homeDailyBody" style="display:none;margin-top:8px">
   <div id="nextQuest"></div>
@@ -737,7 +743,19 @@ function toggleHomeDaily(){
 }
 
 function renderCal(){let y=view.getFullYear(),m=view.getMonth(),f=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();$('calTitle').textContent=`${y}年${m+1}月`;let h='日月火水木金土'.split('').map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<f;i++)h+='<div></div>';for(let i=1;i<=days;i++){let k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`,has=D.events.some(x=>x.date===k)||D.quests.some(x=>x.due===k)||D.tx.some(x=>x.date===k);h+=`<div class="day ${k===dk(new Date())?'today':''} ${k===selected?'selected':''} ${has?'has':''}" onclick="pick('${k}')">${i}</div>`}$('cal').innerHTML=h}
-function render(){applyTheme();let n=summary();$('appTitle').textContent=D.title;let st=$('settingsTitle');if(st)st.value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let todayHomeQs=D.quests.filter(x=>questPlanDate(x)===todayKey);$('nextQuest').innerHTML=todayHomeQs.length?todayHomeQs.map(x=>{let st=x.status||'pending';return `<div class="dailyItem"><div class="dailyTop"><div><div class="dailyTitle">${x.title}</div>${x.memo?`<div class="dailyMeta">${x.memo}</div>`:''}<span class="statusMini ${st}">${st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち'}</span></div></div><div class="dailyActions open"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'今日のデイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
+
+function renderHomeWeekEvents(){
+ let box=$('homeWeekEvents');if(!box)return;
+ let start=new Date();start.setHours(12,0,0,0);
+ let end=new Date(start);end.setDate(end.getDate()+6);
+ let sk=dk(start),ek=dk(end);
+ let items=(D.events||[]).filter(x=>x.kind==='event'&&x.date>=sk&&x.date<=ek)
+   .slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||'')||(a.createdAt||a.id||0)-(b.createdAt||b.id||0));
+ let label=k=>{let d=new Date(k+'T12:00:00'),w='日月火水木金土'[d.getDay()];return `${d.getMonth()+1}/${d.getDate()}（${w}）`;};
+ box.innerHTML=items.length?items.map(x=>`<div class="homeWeekEvent"><div class="homeWeekDate">${label(x.date)}</div><div class="homeWeekTitle">${x.title}</div></div>`).join(''):'<div class="muted" style="padding-top:8px">今後1週間の予定はありません。</div>';
+}
+
+function render(){applyTheme();renderHomeWeekEvents();let n=summary();$('appTitle').textContent=D.title;let st=$('settingsTitle');if(st)st.value=D.title;$('homeBal').textContent=$('bal').textContent='¥'+D.money.toLocaleString();$('homeNet').textContent=$('net').textContent=(n>=0?'+':'')+'¥'+n.toLocaleString();let mv=moodValue(dk(new Date())),ms=[['😄','良い'],['🙂','普通'],['😐','微妙'],['😫','疲れた']];$('moods').innerHTML=ms.map(x=>`<button class="${mv===x[1]?'sel':''}" onclick="setMood('${x[1]}')">${x[0]}<div style="font-size:10px">${x[1]}</div></button>`).join('');$('moodText').textContent=mv?'今日は「'+mv+'」':'気が向いた時に1回タップするだけ。';let todayKey=dk(new Date());let todayHomeQs=D.quests.filter(x=>questPlanDate(x)===todayKey);$('nextQuest').innerHTML=todayHomeQs.length?todayHomeQs.map(x=>{let st=x.status||'pending';return `<div class="dailyItem"><div class="dailyTop"><div><div class="dailyTitle">${x.title}</div>${x.memo?`<div class="dailyMeta">${x.memo}</div>`:''}<span class="statusMini ${st}">${st==='achieved'?'✅ 達成':st==='missed'?'❌ 未達成':'⏳ 判定待ち'}</span></div></div><div class="dailyActions open"><button class="achieve" onclick="setQuestResult(${x.id},'achieved')">✅ 達成</button><button class="miss" onclick="setQuestResult(${x.id},'missed')">❌ 未達成</button>${st!=='pending'?`<button class="pending" onclick="resetQuestResult(${x.id})">↩ 判定待ち</button>`:''}</div></div>`}).join(''):'今日のデイリーはありません。';$('rewardHome').innerHTML=rewardMarkup('week','今週')+rewardMarkup('month','今月');$('recentMemo').textContent=D.memos[0]?.text||'まだありません。';renderLedgerHistory();$('rtxList').innerHTML=(D.recurringTx||[]).length?D.recurringTx.map(r=>`<div class="template row"><div><b>${r.type==='income'?'💵':'💸'} ${r.memo||r.cat}</b><div class="muted">毎月${r.day}日 / ¥${r.amount.toLocaleString()}</div></div><button class="danger" onclick="delRecurringTx(${r.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">定期収支はありません。</div>';{
  let today=dk(new Date());
  let itemHtml=x=>{
    let st=x.status||'pending';
