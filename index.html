@@ -79,6 +79,21 @@
 .homeLayoutName{display:flex;align-items:center;gap:8px;font-weight:900}.homeLayoutBtns{display:flex;gap:5px}.homeLayoutBtns button{padding:7px 9px;font-size:12px}
 .quickTxGrid{display:grid;grid-template-columns:1fr;gap:7px;margin-top:8px}.quickTxItem{display:grid;grid-template-columns:1fr 42px;gap:7px}.quickTxMain{text-align:left;padding:10px 12px}.quickTxTitle{font-weight:900}.quickTxMeta{font-size:12px;color:#78909d;margin-top:2px}.quickTxDelete{padding:8px 4px}
 .homeWeekMeta{font-size:11px;color:#78909d;margin-top:3px;font-weight:700}.homeWeekEvent{align-items:start}
+.homeLayoutRow{display:flex!important;align-items:center!important;gap:8px!important;padding:9px 0!important;border-bottom:1px solid #dce8ed!important}
+.homeLayoutRow:last-child{border-bottom:0!important}
+.homeLayoutOrder{display:inline-flex;flex:0 0 26px;align-items:center;justify-content:center;height:26px;border-radius:8px;background:#edf7fa;color:#587486;font-size:12px;font-weight:900}
+.homeLayoutName{flex:1!important;min-width:0!important;display:flex!important;align-items:center!important;gap:7px!important;font-weight:900!important;font-size:14px!important;line-height:1.3!important}
+.homeLayoutName input{flex:0 0 auto!important;width:22px!important;height:22px!important;margin:0!important}
+.homeLayoutName span{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.homeLayoutBtns{flex:0 0 auto!important;display:flex!important;gap:4px!important}
+.homeLayoutBtns button{width:36px!important;height:36px!important;padding:0!important;font-size:17px!important}
+.moneyFoldCard{padding-top:16px;padding-bottom:16px}
+.moneyFoldHead{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:transparent;padding:0;text-align:left}
+.moneyFoldHead h2{margin:0}.moneyFoldState{font-size:12px;color:#6f8793;font-weight:800;white-space:nowrap}
+.moneyFoldBody{display:none;margin-top:12px}.moneyFoldBody.open{display:block}
+.updateHistoryHead{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:transparent;padding:0;text-align:left}.updateHistoryHead h2{margin:0}
+.updateHistoryBody{display:none;margin-top:12px}.updateHistoryBody.open{display:block}
+.updateEntry{padding:10px 0;border-top:1px solid #dce8ed;line-height:1.65;font-size:13px;color:#536f7e}.updateEntry:first-child{border-top:0}.updateEntry b{font-size:14px;color:#31596e}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -122,7 +137,16 @@
   <div class="row"><h2>⚡ クイック入力</h2><span class="muted">タップで今日に記録</span></div>
   <div id="quickTxList"></div>
   <div id="quickTxStatus" class="muted" style="margin-top:7px"></div>
-</div><div class="card"><h2>🧮 電卓</h2><div class="calcout" id="calcOut">0</div><div class="calc" id="calc"></div><button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button></div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date">
+</div><div class="card moneyFoldCard">
+  <button class="moneyFoldHead" onclick="toggleMoneyFold('moneyCalcBody',this)">
+    <h2>🧮 電卓</h2><span class="moneyFoldState">開く ＋</span>
+  </button>
+  <div id="moneyCalcBody" class="moneyFoldBody">
+    <div class="calcout" id="calcOut">0</div>
+    <div class="calc" id="calc"></div>
+    <button style="width:100%;margin-top:8px" onclick="useCalc()">結果を金額に入れる</button>
+  </div>
+</div><div class="card"><h2>＋ 記録</h2><div class="grid2"><select id="txType"><option value="expense">支出</option><option value="income">収入</option></select><select id="txCat"><option>食費</option><option>交通</option><option>固定費</option><option>車</option><option>趣味</option><option>日用品</option><option>給料</option><option>その他</option></select></div><input id="txAmount" type="number" inputmode="decimal" placeholder="金額"><input id="txMemo" placeholder="メモ"><input id="txDate" type="date">
 <div class="grid2">
   <button onclick="saveQuickTx()">⚡ クイック登録</button>
   <button class="primary" onclick="addTx()">保存</button>
@@ -139,14 +163,24 @@
 <button class="primary" style="width:100%" onclick="addRecurringTx()">定期収支を追加</button>
 <div id="rtxList"></div>
 </div>
-<div class="card">
-<div class="row"><h2>🎯 月予算</h2><button onclick="tab('settings')">設定</button></div>
-<div id="budgetSummary"></div>
+<div class="card moneyFoldCard">
+  <button class="moneyFoldHead" onclick="toggleMoneyFold('moneyBudgetBody',this)">
+    <h2>🎯 月予算</h2><span class="moneyFoldState">開く ＋</span>
+  </button>
+  <div id="moneyBudgetBody" class="moneyFoldBody">
+    <div class="row" style="margin-bottom:8px"><span class="muted">カテゴリ別の予算状況</span><button onclick="event.stopPropagation();tab('settings')">設定</button></div>
+    <div id="budgetSummary"></div>
+  </div>
 </div>
-<div class="card">
-<div class="row"><h2>📊 家計簿グラフ</h2><span class="muted">今月の支出</span></div>
-<div class="chartWrap"><canvas id="expenseChart" class="chart" width="420" height="220"></canvas></div>
-<div id="chartLegend" class="chartLegend"></div>
+<div class="card moneyFoldCard">
+  <button class="moneyFoldHead" onclick="toggleMoneyFold('moneyChartBody',this,'chart')">
+    <h2>📊 家計簿グラフ</h2><span class="moneyFoldState">開く ＋</span>
+  </button>
+  <div id="moneyChartBody" class="moneyFoldBody">
+    <div class="muted" style="margin-bottom:8px">今月の支出</div>
+    <div class="chartWrap"><canvas id="expenseChart" class="chart" width="420" height="220"></canvas></div>
+    <div id="chartLegend" class="chartLegend"></div>
+  </div>
 </div>
 <div class="card">
 <div class="row"><h2>📒 履歴</h2><span class="muted">日付をタップで開閉</span></div>
@@ -361,7 +395,7 @@
   </div>
   <div class="section">
     <h2 style="font-size:17px">🏠 ホーム表示</h2>
-    <div class="muted">表示するカードと順番をこの端末だけで変更できます。</div>
+    <div class="muted">表示・非表示を切り替えて、↑↓で順番を変更できます。</div>
     <div id="homeLayoutList"></div>
   </div>
   <div class="section">
@@ -392,6 +426,46 @@
     <div class="muted">必要件数以上を判定済みにして、達成率も超えるとご褒美解放。</div>
   </div>
   <button class="primary" style="width:100%;margin-top:10px" onclick="saveAppSettings()">設定を保存</button>
+</div>
+
+<div class="card">
+  <button class="updateHistoryHead" onclick="toggleUpdateHistory()">
+    <div>
+      <h2>🆕 アップデート履歴</h2>
+      <div class="muted">現在 Ver.4.12.8</div>
+    </div>
+    <span id="updateHistoryIcon">＋</span>
+  </button>
+  <div id="updateHistoryBody" class="updateHistoryBody">
+    <div class="updateEntry">
+      <b>Ver.4.12.8</b>
+      <div>・ホーム並び替え画面を見やすく改善</div>
+      <div>・家計簿の電卓 / 月予算 / グラフを折りたたみ式に変更</div>
+      <div>・設定にアップデート履歴を追加</div>
+    </div>
+    <div class="updateEntry">
+      <b>Ver.4.12.7</b>
+      <div>・ホームカードの並び替え / 非表示</div>
+      <div>・家計簿クイック入力</div>
+      <div>・ホームの1週間予定に仕事区分と時間を表示</div>
+    </div>
+    <div class="updateEntry">
+      <b>Ver.4.12.6</b>
+      <div>・過去デイリーを日付ごとに折りたたみ</div>
+    </div>
+    <div class="updateEntry">
+      <b>Ver.4.12.5</b>
+      <div>・家計簿履歴を月 / 日付ごとに整理</div>
+    </div>
+    <div class="updateEntry">
+      <b>Ver.4.12.4</b>
+      <div>・仕事に早番 / 中番 / 遅番と勤務時間設定を追加</div>
+    </div>
+    <div class="updateEntry">
+      <b>Ver.4.12.1〜4.12.3</b>
+      <div>・カレンダーの予定編集、印カスタム、仕事 / 学校などの予定強化</div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
@@ -930,7 +1004,7 @@ function renderBudgetSummary(){
    return `<div class="budgetRow"><div class="budgetHead"><b>${cat}</b><span>¥${spent.toLocaleString()} / ¥${budget.toLocaleString()}</span></div><div class="budgetBar"><div class="budgetFill ${spent>budget?'budgetOver':''}" style="width:${pct}%"></div></div><div class="muted">${left>=0?'残り ¥'+left.toLocaleString():'予算超過 ¥'+Math.abs(left).toLocaleString()}</div></div>`;
  }).join('')||'<div class="muted">設定画面から月予算を設定できます。</div>';
 }
-function renderExpenseChart(){
+function renderExpenseChart(){let fold=$('moneyChartBody');if(fold&&!fold.classList.contains('open'))return;
  let c=$('expenseChart');if(!c||!c.getContext)return;let ctx=c.getContext('2d');if(!ctx)return;
  let n=new Date(),prefix=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
  let cats=['食費','交通','固定費','車','趣味','日用品','その他'];
@@ -1032,6 +1106,21 @@ function renderCal(){
 }
 
 
+
+function toggleMoneyFold(id,btn,kind=''){
+ let body=$(id);if(!body)return;
+ let open=!body.classList.contains('open');
+ body.classList.toggle('open',open);
+ let state=btn&&btn.querySelector('.moneyFoldState');
+ if(state)state.textContent=open?'閉じる −':'開く ＋';
+ if(open&&kind==='chart')setTimeout(()=>renderExpenseChart(),30);
+}
+function toggleUpdateHistory(){
+ let body=$('updateHistoryBody'),icon=$('updateHistoryIcon');if(!body)return;
+ body.classList.toggle('open');
+ if(icon)icon.textContent=body.classList.contains('open')?'−':'＋';
+}
+
 function renderMoneyOverview(){
  let now=new Date(),prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
  let rows=(D.tx||[]).filter(x=>x.date&&x.date.startsWith(prefix));
@@ -1068,10 +1157,14 @@ function renderHomeLayoutSettings(){
  let box=$('homeLayoutList');if(!box)return;
  normalizeHomeLayout();
  box.innerHTML=D.homeLayout.order.map((k,i)=>`<div class="homeLayoutRow">
-   <label class="homeLayoutName"><input type="checkbox" ${D.homeLayout.hidden.includes(k)?'':'checked'} onchange="toggleHomeCard('${k}',this.checked)"> ${HOME_CARD_LABELS[k]}</label>
+   <span class="homeLayoutOrder">${i+1}</span>
+   <label class="homeLayoutName">
+     <input type="checkbox" ${D.homeLayout.hidden.includes(k)?'':'checked'} onchange="toggleHomeCard('${k}',this.checked)">
+     <span>${HOME_CARD_LABELS[k]}</span>
+   </label>
    <div class="homeLayoutBtns">
-     <button ${i===0?'disabled':''} onclick="moveHomeCard('${k}',-1)">↑</button>
-     <button ${i===D.homeLayout.order.length-1?'disabled':''} onclick="moveHomeCard('${k}',1)">↓</button>
+     <button aria-label="上へ" ${i===0?'disabled':''} onclick="moveHomeCard('${k}',-1)">↑</button>
+     <button aria-label="下へ" ${i===D.homeLayout.order.length-1?'disabled':''} onclick="moveHomeCard('${k}',1)">↓</button>
    </div>
  </div>`).join('');
 }
