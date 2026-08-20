@@ -94,6 +94,13 @@
 .updateHistoryHead{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:transparent;padding:0;text-align:left}.updateHistoryHead h2{margin:0}
 .updateHistoryBody{display:none;margin-top:12px}.updateHistoryBody.open{display:block}
 .updateEntry{padding:10px 0;border-top:1px solid #dce8ed;line-height:1.65;font-size:13px;color:#536f7e}.updateEntry:first-child{border-top:0}.updateEntry b{font-size:14px;color:#31596e}
+.repeatDailyHead{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:transparent;padding:0;text-align:left}.repeatDailyHead h2{margin:0}.repeatDailyHead>span{font-size:22px;color:#5e7a88;font-weight:900}
+.repeatDailyPanel{display:none;margin-top:12px}.repeatDailyPanel.open{display:block}
+.dailyTemplateCard{padding:11px 0;border-top:1px solid #dce8ed}.dailyTemplateCard:first-child{border-top:0}
+.dailyTemplateTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.dailyTemplateTitle{font-weight:900;font-size:16px}.dailyTemplateMeta{font-size:12px;color:#7c919c;margin-top:3px}.dailyTemplateBtns{display:flex;gap:6px;flex-shrink:0}.dailyTemplateBtns button{padding:8px 9px;font-size:12px}
+.dailyTemplateEdit{display:none;margin-top:10px;padding:10px;background:#f6fbfd;border-radius:14px}.dailyTemplateEdit.open{display:block}.dailyTemplateEdit textarea{min-height:72px}
+.editWeekdayPicker{display:none;margin:7px 0 9px}.editWeekdayPicker.open{display:block}
+.editWeekdayGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.editWeekdayChip{display:block;position:relative}.editWeekdayChip input{position:absolute;opacity:0;pointer-events:none}.editWeekdayChip span{display:flex;align-items:center;justify-content:center;height:38px;border-radius:11px;background:#eef7fa;border:2px solid transparent;font-weight:900;color:#426173}.editWeekdayChip input:checked+span{background:#dff7e8;border-color:#63c58b;color:#277d4b}
 </style></head><body>
 <div id="setupOverlay" class="setupOverlay">
  <div class="setupCard">
@@ -254,7 +261,7 @@
       <select id="eventRepeat" onchange="toggleEventRepeatPicker()">
         <option value="none">この日だけ</option>
         <option value="daily">毎日</option>
-        <option value="customDays">曜日を選ぶ</option>
+        <option value="customDays">曜日を複数選ぶ</option>
       </select>
       <div id="eventRepeatOptions" style="display:none">
         <div id="eventWeekdayPicker" style="display:none">
@@ -340,7 +347,7 @@
   <option value="customDays">曜日を選ぶ</option>
 </select>
 <div id="weekdayPicker" style="display:none">
-  <div class="muted" style="margin:6px 0 8px">繰り返す曜日を複数選べます</div>
+  <div class="muted" style="margin:6px 0 8px">複数選択できます（例：月・水・金）</div>
   <div class="weekdayGrid">
     <label class="weekdayChip sun"><input class="weekdayCheck" type="checkbox" value="0"><span>日</span></label>
     <label class="weekdayChip"><input class="weekdayCheck" type="checkbox" value="1"><span>月</span></label>
@@ -353,7 +360,19 @@
 </div>
 <textarea id="qMemo" placeholder="メモ"></textarea>
 <button class="primary" style="width:100%" onclick="addQuest()">追加</button></div>
-<div class="card"><h2>🔁 繰り返しデイリー</h2><div class="muted">繰り返しデイリーは、その日になった時だけ今日のデイリーとして自動追加されます。</div><div id="dailyTemplateList"></div></div>
+<div class="card">
+  <button class="repeatDailyHead" onclick="toggleRepeatDailyPanel()">
+    <div>
+      <h2>🔁 繰り返しデイリー</h2>
+      <div class="muted">登録済みの繰り返しを確認・編集できます。</div>
+    </div>
+    <span id="repeatDailyPanelIcon">−</span>
+  </button>
+  <div id="repeatDailyPanel" class="repeatDailyPanel open">
+    <div class="muted" style="margin-bottom:8px">その日になった時だけ今日のデイリーとして自動追加されます。</div>
+    <div id="dailyTemplateList"></div>
+  </div>
+</div>
 <div class="card">
 <h2>🎁 ご褒美内容</h2>
 <div class="muted">週間ご褒美</div>
@@ -432,11 +451,17 @@
   <button class="updateHistoryHead" onclick="toggleUpdateHistory()">
     <div>
       <h2>🆕 アップデート履歴</h2>
-      <div class="muted">現在 Ver.4.12.8</div>
+      <div class="muted">現在 Ver.4.12.9</div>
     </div>
     <span id="updateHistoryIcon">＋</span>
   </button>
   <div id="updateHistoryBody" class="updateHistoryBody">
+    <div class="updateEntry">
+      <b>Ver.4.12.9</b>
+      <div>・繰り返しデイリーを編集可能に</div>
+      <div>・繰り返しデイリー欄を開閉可能に</div>
+      <div>・曜日を複数選択して繰り返し設定</div>
+    </div>
     <div class="updateEntry">
       <b>Ver.4.12.8</b>
       <div>・ホーム並び替え画面を見やすく改善</div>
@@ -688,6 +713,38 @@ function delTx(id){
  D.money-=tx.type==='income'?tx.amount:-tx.amount;
  D.tx=D.tx.filter(x=>x.id!==id);
  save();render();
+}
+
+
+function toggleRepeatDailyPanel(){
+ let panel=$('repeatDailyPanel'),icon=$('repeatDailyPanelIcon');if(!panel)return;
+ panel.classList.toggle('open');
+ if(icon)icon.textContent=panel.classList.contains('open')?'−':'＋';
+}
+function editTemplateDays(id){
+ return [...document.querySelectorAll('.editWeekdayCheck[data-template="'+id+'"]:checked')].map(x=>Number(x.value));
+}
+function toggleTemplateWeekdays(id){
+ let repeat=$('templateRepeat-'+id)?.value,box=$('templateWeekdays-'+id);
+ if(box)box.classList.toggle('open',repeat==='customDays');
+}
+function toggleDailyTemplateEdit(id){
+ let box=$('dailyTemplateEdit-'+id);if(box)box.classList.toggle('open');
+}
+function saveDailyTemplateEdit(id){
+ let t=(D.dailyTemplates||[]).find(x=>x.id===id);if(!t)return;
+ let title=$('templateTitle-'+id)?.value.trim();if(!title)return alert('クエスト名を入力してください');
+ let repeat=$('templateRepeat-'+id)?.value||'daily';
+ let days=repeat==='customDays'?editTemplateDays(id):[];
+ if(repeat==='customDays'&&!days.length)return alert('繰り返す曜日を1つ以上選んでください');
+ t.title=title;
+ t.memo=$('templateMemo-'+id)?.value.trim()||'';
+ t.start=$('templateStart-'+id)?.value||t.start;
+ t.repeat=repeat;
+ t.days=days;
+ save();
+ ensureDailyQuests();
+ render();
 }
 
 function selectedRepeatDays(){
@@ -1282,7 +1339,38 @@ function render(){applyTheme();applyHomeLayout();renderHomeLayoutSettings();rend
        ${pastGroupedHtml}
      </div>
    </div>`;
-}$('eventPresetList').innerHTML=(D.eventPresets||[]).length?D.eventPresets.map(p=>`<div class="eventPresetCard"><div><b>${eventTypeLabel(p.eventType)}${p.workShift?'・'+workShiftLabel(p.workShift):''} ${p.title}</b><div class="eventPresetMeta">${p.time||''}${p.endTime?'〜'+p.endTime:''}${p.memo?' ・ '+p.memo:''}</div></div><div class="eventPresetBtns"><button onclick="useEventPreset(${p.id})">使う</button><button class="danger" onclick="delEventPreset(${p.id})">削除</button></div></div>`).join(''):'<div class="muted" style="margin-top:8px">予定リストはまだありません。</div>';$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>`<div class="template row"><div><b>🔁 ${t.title}</b><div class="muted">${repeatLabel(t)} / ${t.start}〜</div></div><button class="danger" onclick="delDailyTemplate(${t.id})">削除</button></div>`).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;renderWorkShiftSettings();toggleWorkShiftPanel();;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'
+}$('eventPresetList').innerHTML=(D.eventPresets||[]).length?D.eventPresets.map(p=>`<div class="eventPresetCard"><div><b>${eventTypeLabel(p.eventType)}${p.workShift?'・'+workShiftLabel(p.workShift):''} ${p.title}</b><div class="eventPresetMeta">${p.time||''}${p.endTime?'〜'+p.endTime:''}${p.memo?' ・ '+p.memo:''}</div></div><div class="eventPresetBtns"><button onclick="useEventPreset(${p.id})">使う</button><button class="danger" onclick="delEventPreset(${p.id})">削除</button></div></div>`).join(''):'<div class="muted" style="margin-top:8px">予定リストはまだありません。</div>';$('dailyTemplateList').innerHTML=(D.dailyTemplates||[]).length?D.dailyTemplates.map(t=>{
+ let days=(t.days||[]),repeat=t.repeat||'daily';
+ let weekday=(n,label)=>`<label class="editWeekdayChip"><input class="editWeekdayCheck" data-template="${t.id}" type="checkbox" value="${n}" ${days.includes(n)?'checked':''}><span>${label}</span></label>`;
+ return `<div class="dailyTemplateCard">
+   <div class="dailyTemplateTop">
+     <div>
+       <div class="dailyTemplateTitle">🔁 ${t.title}</div>
+       <div class="dailyTemplateMeta">${repeatLabel(t)} / ${t.start}〜${t.memo?' ・ '+t.memo:''}</div>
+     </div>
+     <div class="dailyTemplateBtns">
+       <button onclick="toggleDailyTemplateEdit(${t.id})">✏️ 編集</button>
+       <button class="danger" onclick="delDailyTemplate(${t.id})">削除</button>
+     </div>
+   </div>
+   <div id="dailyTemplateEdit-${t.id}" class="dailyTemplateEdit">
+     <input id="templateTitle-${t.id}" value="${t.title}" placeholder="クエスト名">
+     <input id="templateStart-${t.id}" type="date" value="${t.start}">
+     <select id="templateRepeat-${t.id}" onchange="toggleTemplateWeekdays(${t.id})">
+       <option value="daily" ${repeat==='daily'?'selected':''}>毎日</option>
+       <option value="customDays" ${repeat==='customDays'?'selected':''}>曜日を複数選ぶ</option>
+     </select>
+     <div id="templateWeekdays-${t.id}" class="editWeekdayPicker ${repeat==='customDays'?'open':''}">
+       <div class="muted" style="margin-bottom:6px">複数選択できます</div>
+       <div class="editWeekdayGrid">
+         ${weekday(0,'日')}${weekday(1,'月')}${weekday(2,'火')}${weekday(3,'水')}${weekday(4,'木')}${weekday(5,'金')}${weekday(6,'土')}
+       </div>
+     </div>
+     <textarea id="templateMemo-${t.id}" placeholder="メモ">${t.memo||''}</textarea>
+     <button class="primary" style="width:100%" onclick="saveDailyTemplateEdit(${t.id})">変更を保存</button>
+   </div>
+ </div>`;
+}).join(''):'<div class="muted" style="margin-top:8px">繰り返し設定はありません。</div>';$('memoList').innerHTML=D.memos.map(x=>`<div class="note">${x.text}<div class="row"><span class="muted">${x.date}</span><button class="danger" onclick="delMemo(${x.id})">削除</button></div></div>`).join('');$('weekReward').value=D.rewards.weekReward;$('monthReward').value=D.rewards.monthReward;$('settingsPlayer').value=D.player||'';$('settingsTitle').value=D.title||'シムレポート';$('settingsWeekThreshold').value=D.rewards.weekThreshold||80;$('settingsWeekMinCount').value=D.rewards.weekMinCount||5;$('settingsMonthThreshold').value=D.rewards.monthThreshold||80;$('settingsMonthMinCount').value=D.rewards.monthMinCount||20;renderWorkShiftSettings();toggleWorkShiftPanel();;['食費','交通','固定費','車','趣味','日用品','その他'].forEach(cat=>{$(categoryBudgetId(cat)).value=D.budgets[cat]||0});$('selDate').textContent=selected;let logs=D.events.filter(x=>x.date===selected);$('dayLog').innerHTML=logs.map(x=>x.kind==='photo'
  ? `<div class="calendarEventCard"><div class="calendarEventTitle">📷 ${x.title}</div><img class="photo" src="${x.data}"><div class="eventManageBtns"><button class="danger" onclick="delEvent(${x.id})">🗑 削除</button></div></div>`
  : `<div class="calendarEventCard ${isEventPast(x)?'past':''}">
       <div class="calendarEventTitle">📅 ${eventTypeLabel(x.eventType||'plan')}${x.workShift?`<span class="shiftBadge">${workShiftLabel(x.workShift)}</span>`:''}　${x.title}</div>
